@@ -1,7 +1,7 @@
 package fr.mosca421.worldprotector.util;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import fr.mosca421.worldprotector.core.IRegion;
+import fr.mosca421.worldprotector.core.IMarkableRegion;
 import fr.mosca421.worldprotector.core.Region;
 import fr.mosca421.worldprotector.data.RegionManager;
 import fr.mosca421.worldprotector.item.ItemRegionMarker;
@@ -76,7 +76,7 @@ public final class RegionUtils {
 						RegionManager.get().getRegion(regionName).ifPresent(region -> {
 							region.setArea(getAreaFromNBT(item.getTag()));
 							region.setTpTarget(getTpTargetFromNBT(item.getTag()));
-							RegionManager.get().updateRegion(new Region(region), player);
+							RegionManager.get().updateRegion(new Region(region.serializeNBT()), player);
 							item.getTag().putBoolean(ItemRegionMarker.VALID, false); // reset flag for consistent command behaviour
 							sendMessage(player, new TranslationTextComponent("message.region.redefine", regionName));
 						});
@@ -114,14 +114,14 @@ public final class RegionUtils {
 		}
 	}
 
-	public static void activateAll(Collection<IRegion> regions, PlayerEntity player) {
-		List<IRegion> deactiveRegions = regions.stream()
+	public static void activateAll(Collection<IMarkableRegion> regions, PlayerEntity player) {
+		List<IMarkableRegion> deactiveRegions = regions.stream()
 				.filter(region -> !region.isActive())
 				.collect(Collectors.toList());
 		deactiveRegions.forEach(region -> region.setIsActive(true));
 		RegionManager.get().markDirty();
 		List<String> activatedRegions = deactiveRegions.stream()
-				.map(IRegion::getName)
+				.map(IMarkableRegion::getName)
 				.collect(Collectors.toList());
 		String regionString = String.join(", ", activatedRegions);
 		if (!activatedRegions.isEmpty()) {
@@ -139,14 +139,14 @@ public final class RegionUtils {
 		}
 	}
 
-	public static void deactivateAll(Collection<IRegion> regions, PlayerEntity player) {
-		List<IRegion> activeRegions = regions.stream()
-				.filter(IRegion::isActive)
+	public static void deactivateAll(Collection<IMarkableRegion> regions, PlayerEntity player) {
+		List<IMarkableRegion> activeRegions = regions.stream()
+				.filter(IMarkableRegion::isActive)
 				.collect(Collectors.toList());
 		activeRegions.forEach(region -> region.setIsActive(false));
 		RegionManager.get().markDirty();
 		List<String> deactivatedRegions = activeRegions.stream()
-				.map(IRegion::getName)
+				.map(IMarkableRegion::getName)
 				.collect(Collectors.toList());
 		String regionString = String.join(", ", deactivatedRegions);
 		if (!deactivatedRegions.isEmpty()) {
@@ -177,7 +177,7 @@ public final class RegionUtils {
 		RegistryKey<World> dim = player.world.getDimensionKey();
 		return RegionManager.get().getRegions(dim).stream()
 				.filter(region -> region.containsPosition(playerPos))
-				.map(IRegion::getName)
+				.map(IMarkableRegion::getName)
 				.collect(Collectors.toList());
 	}
 
@@ -282,7 +282,7 @@ public final class RegionUtils {
 	}
 
 	public static void giveRegionList(PlayerEntity player) {
-		Collection<IRegion> regions = RegionManager.get().getAllRegionsSorted();
+		Collection<IMarkableRegion> regions = RegionManager.get().getAllRegionsSorted();
 		if (regions.isEmpty()) {
 			sendStatusMessage(player, "message.region.info.no_regions");
 			return;
@@ -293,10 +293,10 @@ public final class RegionUtils {
 	}
 
 	public static void giveRegionListForDim(PlayerEntity player, String dim) {
-		List<IRegion> regionsForDim = RegionManager.get().getAllRegions()
+		List<IMarkableRegion> regionsForDim = RegionManager.get().getAllRegions()
 				.stream()
 				.filter(region -> region.getDimension().getLocation().toString().equals(dim))
-				.sorted(Comparator.comparing(IRegion::getName))
+				.sorted(Comparator.comparing(IMarkableRegion::getName))
 				.collect(Collectors.toList());
 		if (regionsForDim.isEmpty()) {
 			sendMessage(player, new TranslationTextComponent("message.region.info.regions_for_dim", dim));
@@ -322,22 +322,22 @@ public final class RegionUtils {
 				.collect(Collectors.toList());
 	}
 
-	public static List<IRegion> getHandlingRegionsFor(Entity entity, IWorld world) {
+	public static List<IMarkableRegion> getHandlingRegionsFor(Entity entity, IWorld world) {
 		return getHandlingRegionsFor(entity.getPosition(), ((World) world).getDimensionKey());
 	}
 
-	public static List<IRegion> getHandlingRegionsFor(BlockPos position, World world) {
+	public static List<IMarkableRegion> getHandlingRegionsFor(BlockPos position, World world) {
 		return getHandlingRegionsFor(position, world.getDimensionKey());
 	}
 
-	public static List<IRegion> getHandlingRegionsFor(BlockPos position, RegistryKey<World> dimension) {
+	public static List<IMarkableRegion> getHandlingRegionsFor(BlockPos position, RegistryKey<World> dimension) {
 		int maxPriority = 1;
-		List<IRegion> handlingRegions = new ArrayList<>();
-		List<IRegion> filteredRegions = RegionManager.get().getRegions(dimension).stream()
-				.filter(IRegion::isActive)
+		List<IMarkableRegion> handlingRegions = new ArrayList<>();
+		List<IMarkableRegion> filteredRegions = RegionManager.get().getRegions(dimension).stream()
+				.filter(IMarkableRegion::isActive)
 				.filter(region -> region.containsPosition(position))
 				.collect(Collectors.toList());
-		for (IRegion region : filteredRegions) {
+		for (IMarkableRegion region : filteredRegions) {
 			if (region.getPriority() == maxPriority) {
 				handlingRegions.add(region);
 			} else if (region.getPriority() > maxPriority) {

@@ -1,7 +1,7 @@
 package fr.mosca421.worldprotector.event;
 
 import fr.mosca421.worldprotector.WorldProtector;
-import fr.mosca421.worldprotector.core.IRegion;
+import fr.mosca421.worldprotector.core.IMarkableRegion;
 import fr.mosca421.worldprotector.core.RegionFlag;
 import fr.mosca421.worldprotector.util.MessageUtils;
 import fr.mosca421.worldprotector.util.RegionUtils;
@@ -36,8 +36,8 @@ public class EventWorld {
     @SubscribeEvent
     public static void onFarmLandTrampled(BlockEvent.FarmlandTrampleEvent event) {
         if (!event.getWorld().isRemote()) {
-            List<IRegion> regions = RegionUtils.getHandlingRegionsFor(event.getPos(), (World) event.getWorld());
-            for (IRegion r : regions) {
+            List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(event.getPos(), (World) event.getWorld());
+            for (IMarkableRegion r : regions) {
                 // cancel all trampling
                 if (r.containsFlag(RegionFlag.TRAMPLE_FARMLAND.toString())) {
                     event.setCanceled(true);
@@ -78,8 +78,8 @@ public class EventWorld {
     public static void onBonemealUse(BonemealEvent event){
         if (!event.getWorld().isRemote) {
             PlayerEntity player = (PlayerEntity) event.getEntity();
-            List<IRegion> regions = RegionUtils.getHandlingRegionsFor(event.getPos(), player.world);
-            for (IRegion region : regions) {
+            List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(event.getPos(), player.world);
+            for (IMarkableRegion region : regions) {
                 if (region.containsFlag(RegionFlag.USE_BONEMEAL) && region.forbids(player)) {
                     event.setCanceled(true);
                     if (!region.isMuted()) {
@@ -96,9 +96,9 @@ public class EventWorld {
         if (!event.getEntityLiving().world.isRemote) {
             PlayerEntity player = event.getAttackingPlayer();
             Entity entity = event.getEntity();
-            List<IRegion> regions = RegionUtils.getHandlingRegionsFor(entity, entity.world);
+            List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(entity, entity.world);
             boolean entityDroppingXpIsPlayer = event.getEntityLiving() instanceof PlayerEntity;
-            for (IRegion region : regions) {
+            for (IMarkableRegion region : regions) {
                 // prevent all xp drops
                 if (region.containsFlag(RegionFlag.XP_DROP_ALL)) {
                     if (entityDroppingXpIsPlayer) {
@@ -151,8 +151,8 @@ public class EventWorld {
     public static void onEntityDestroyBlock(LivingDestroyBlockEvent event){
         if (!event.getEntityLiving().world.isRemote) {
             LivingEntity destroyer = event.getEntityLiving();
-            List<IRegion> regions = RegionUtils.getHandlingRegionsFor(destroyer, destroyer.world);
-            for (IRegion region : regions) {
+            List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(destroyer, destroyer.world);
+            for (IMarkableRegion region : regions) {
                 if (region.containsFlag(RegionFlag.DRAGON_BLOCK_PROT) && destroyer instanceof EnderDragonEntity) {
                     event.setCanceled(true);
                     return;
@@ -172,8 +172,8 @@ public class EventWorld {
 
     @SubscribeEvent
     public static void onNetherPortalSpawn(BlockEvent.PortalSpawnEvent event) {
-        List<IRegion> regions = getHandlingRegionsFor(event.getPos(), (World) event.getWorld());
-        for (IRegion region : regions) {
+        List<IMarkableRegion> regions = getHandlingRegionsFor(event.getPos(), (World) event.getWorld());
+        for (IMarkableRegion region : regions) {
             if (region.containsFlag(RegionFlag.SPAWN_PORTAL)) {
                 event.setCanceled(true);
                 return;
@@ -185,8 +185,8 @@ public class EventWorld {
     @SubscribeEvent
     public static void onChangeDimension(EntityTravelToDimensionEvent event) {
         Entity entity = event.getEntity();
-        List<IRegion> regions = RegionUtils.getHandlingRegionsFor(entity.getPosition(), entity.world);
-        for (IRegion region : regions) {
+        List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(entity.getPosition(), entity.world);
+        for (IMarkableRegion region : regions) {
             if (region.containsFlag(RegionFlag.USE_PORTAL.toString())) {
 
                 if (entity instanceof PlayerEntity) {

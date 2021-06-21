@@ -1,6 +1,6 @@
 package fr.mosca421.worldprotector.util;
 
-import fr.mosca421.worldprotector.core.IRegion;
+import fr.mosca421.worldprotector.core.IMarkableRegion;
 import fr.mosca421.worldprotector.data.RegionManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -50,7 +50,7 @@ public final class MessageUtils {
         });
     }
 
-    public static void sendDimensionTeleportLink(PlayerEntity player, IRegion region, IFormattableTextComponent msg) {
+    public static void sendDimensionTeleportLink(PlayerEntity player, IMarkableRegion region, IFormattableTextComponent msg) {
         BlockPos target = region.getTpTarget();
         String dim = region.getDimension().getLocation().toString();
         sendMessage(player, msg.appendSibling(TextComponentUtils.wrapWithSquareBrackets(new StringTextComponent(dim + "@ [" + target.getX() + ", " + target.getY() + ", " + target.getZ() + "]"))

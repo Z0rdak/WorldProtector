@@ -3,8 +3,8 @@
 WorldProtector is a mod allows you to protect your constructions on your servers. It's based on the same principle as
 the plugin WorldGuard but with several differences at command level.
 
-The port of the 1.16.5 version introduces a lot of new flags, new protection features, as well as some QoL improvements.
-This mentioned be aware that some described features below are not present in every version.
+**The port of the 1.16.5 version introduces a lot of new flags, new protection features, as well as some QoL improvements.
+This mentioned be aware that some described features below are not present in every version.**
 
 To protect your world you can define regions which can be protected against various actions by adding flags to the
 regions. These flags prevent certain actions/events from happening to protect the region: e.g. placing blocks, using
@@ -238,18 +238,18 @@ The following features will be implemented first in the 1.16.5 version, but will
     * Default blacklist/whitelist setting for regions
     * Command permission
 
-* Permission system
+4. Permission system
     * Owner for regions
     * Permission groups
     * Permission levels for region manipulation (creating, deleting, activating, deactivating)
     * Configuration support
-
-5. Modularisation
+5. [Patchouli](https://github.com/Vazkii/Patchouli/wiki) documentation
+6. Modularisation
     * Configuration for server-side only usage
     * Item-less alternative for the Region Marker
     * CLI offers all functionality without using Items
-6. Region highlighting
-7. Define any shape as a region
+7. Region highlighting
+8. Define regions as [prism](https://en.wikipedia.org/wiki/Prism_(geometry)) shapes.
 
 #### Possible new flags:
 

@@ -2,7 +2,7 @@ package fr.mosca421.worldprotector.event;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import fr.mosca421.worldprotector.WorldProtector;
-import fr.mosca421.worldprotector.core.IRegion;
+import fr.mosca421.worldprotector.core.IMarkableRegion;
 import fr.mosca421.worldprotector.core.RegionFlag;
 import fr.mosca421.worldprotector.item.ItemRegionMarker;
 import fr.mosca421.worldprotector.util.MessageUtils;
@@ -43,8 +43,8 @@ public class EventPlayers {
         if (!event.getPlayer().world.isRemote) {
             if (event.getTarget() instanceof PlayerEntity) {
                 PlayerEntity player = (PlayerEntity) event.getTarget();
-                List<IRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
-                for (IRegion region : regions) {
+                List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
+                for (IMarkableRegion region : regions) {
                     if (region.containsFlag(RegionFlag.ATTACK_PLAYERS.toString()) && region.forbids(player)) {
                         if (!region.isMuted()) {
                             sendStatusMessage(player, "message.event.player.pvp");
@@ -60,8 +60,8 @@ public class EventPlayers {
     @SubscribeEvent
     public static void onPickupItem(EntityItemPickupEvent event) {
         if (!event.getPlayer().world.isRemote) {
-            List<IRegion> regions = RegionUtils.getHandlingRegionsFor(event.getPlayer().getPosition(), event.getPlayer().world);
-            for (IRegion region : regions) {
+            List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(event.getPlayer().getPosition(), event.getPlayer().world);
+            for (IMarkableRegion region : regions) {
                 if (region.containsFlag(RegionFlag.ITEM_PICKUP.toString()) && region.forbids(event.getPlayer())) {
                     if (!region.isMuted()) {
                         sendStatusMessage(event.getPlayer(), "message.event.player.pickup_item");
@@ -76,8 +76,8 @@ public class EventPlayers {
     public static void onPlayerLevelChange(PlayerXpEvent.LevelChange event) {
         if (!event.getPlayer().world.isRemote) {
             PlayerEntity player = event.getPlayer();
-            List<IRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
-            for (IRegion region : regions) {
+            List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
+            for (IMarkableRegion region : regions) {
                 if (region.containsFlag(RegionFlag.LEVEL_FREEZE) && region.forbids(player)) {
                     if (!region.isMuted()) {
                         sendStatusMessage(player, "message.event.player.level_freeze");
@@ -93,8 +93,8 @@ public class EventPlayers {
     public static void onPlayerXPChange(PlayerXpEvent.XpChange event) {
         if (!event.getPlayer().world.isRemote) {
             PlayerEntity player = event.getPlayer();
-            List<IRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
-            for (IRegion region : regions) {
+            List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
+            for (IMarkableRegion region : regions) {
                 if (region.containsFlag(RegionFlag.XP_FREEZE.toString()) && region.forbids(player)) {
                     if (!region.isMuted()) {
                         MessageUtils.sendStatusMessage(player, "message.protection.player.xp_freeze");
@@ -114,8 +114,8 @@ public class EventPlayers {
 	public static void onPlayerXpPickup(PlayerXpEvent.PickupXp event){
 		if (!event.getPlayer().world.isRemote) {
             PlayerEntity player = event.getPlayer();
-            List<IRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
-            for (IRegion region : regions) {
+            List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
+            for (IMarkableRegion region : regions) {
                 if (region.containsFlag(RegionFlag.XP_PICKUP.toString()) && region.forbids(player)) {
                     if (!region.isMuted()) {
                         MessageUtils.sendStatusMessage(player, "message.protection.player.xp_pickup");
@@ -135,8 +135,8 @@ public class EventPlayers {
     public static void onHurt(LivingHurtEvent event) {
         if (event.getEntityLiving() instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) event.getEntityLiving();
-            List<IRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
-            for (IRegion region : regions) {
+            List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
+            for (IMarkableRegion region : regions) {
                 if (region.containsFlag(RegionFlag.INVINCIBLE.toString())) {
                     event.setCanceled(true);
                     return;
@@ -149,8 +149,8 @@ public class EventPlayers {
     @SubscribeEvent
     public static void onFall(LivingFallEvent event) {
         LivingEntity entity = event.getEntityLiving();
-        List<IRegion> regions = RegionUtils.getHandlingRegionsFor(entity.getPosition(), entity.world);
-        for (IRegion region : regions) {
+        List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(entity.getPosition(), entity.world);
+        for (IMarkableRegion region : regions) {
             // prevent fall damage for all entities
             if (region.containsFlag(RegionFlag.FALL_DAMAGE.toString())) {
                 event.setCanceled(true); // same result as event.setDamageMultiplier(0.0f);
@@ -197,8 +197,8 @@ public class EventPlayers {
     public static void onSendChat(ServerChatEvent event) {
         if (event.getPlayer() != null) {
             ServerPlayerEntity player = event.getPlayer();
-            List<IRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
-            for (IRegion region : regions) {
+            List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
+            for (IMarkableRegion region : regions) {
                 if (region.containsFlag(RegionFlag.SEND_MESSAGE.toString()) && region.forbids(player)) {
                     event.setCanceled(true);
                     if (!region.isMuted()) {
@@ -221,8 +221,8 @@ public class EventPlayers {
             event.getParseResults().getContext().getSource().assertIsEntity();
             PlayerEntity player = event.getParseResults().getContext().getSource().asPlayer();
             BlockPos playerPos = player.getPosition();
-            List<IRegion> regions = RegionUtils.getHandlingRegionsFor(playerPos, player.world);
-            for (IRegion region : regions) {
+            List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(playerPos, player.world);
+            for (IMarkableRegion region : regions) {
                 if (region.containsFlag(RegionFlag.EXECUTE_COMMAND.toString()) && region.forbids(player)) {
                     event.setCanceled(true);
                     if (!region.isMuted()) {
@@ -242,8 +242,8 @@ public class EventPlayers {
     @SubscribeEvent
     public static void onPlayerSleep(SleepingTimeCheckEvent event) {
         PlayerEntity player = event.getPlayer();
-        List<IRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
-        for (IRegion region : regions) {
+        List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
+        for (IMarkableRegion region : regions) {
             if (region.containsFlag(RegionFlag.SLEEP.toString()) && region.forbids(player)) {
                 if (!region.isMuted()) {
                     MessageUtils.sendStatusMessage(player, "message.event.player.sleep");
@@ -258,10 +258,10 @@ public class EventPlayers {
     public static void onSetSpawn(PlayerSetSpawnEvent event) {
         BlockPos newSpawn = event.getNewSpawn();
         PlayerEntity player = event.getPlayer();
-        List<IRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
+        List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
         if (newSpawn != null) {
             // attempt to set spawn
-            for (IRegion region : regions) {
+            for (IMarkableRegion region : regions) {
                 if (region.containsFlag(RegionFlag.SET_SPAWN.toString()) && region.forbids(player)) {
                     event.setCanceled(true);
                     if (!region.isMuted()) {
@@ -273,7 +273,7 @@ public class EventPlayers {
         } /*
         else {
             // attempt to reset spawn
-            for (IRegion region : regions) {
+            for (IMarkableRegion region : regions) {
                 // TODO: not working?
                 if (region.containsFlag(RegionFlag.RESET_SPAWN.toString()) && region.forbids(player)) {
                     event.setCanceled(true);
@@ -289,8 +289,8 @@ public class EventPlayers {
     @SubscribeEvent
     public static void onPlayerDropItem(ItemTossEvent event) {
         PlayerEntity player = event.getPlayer();
-        List<IRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
-        for (IRegion region : regions) {
+        List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), player.world);
+        for (IMarkableRegion region : regions) {
             if (region.containsFlag(RegionFlag.ITEM_DROP.toString()) && region.forbids(player)) {
                 event.setCanceled(true);
                 player.inventory.addItemStackToInventory(event.getEntityItem().getItem());
@@ -310,8 +310,8 @@ public class EventPlayers {
             boolean playerAttemptsMounting = event.getEntityMounting() instanceof PlayerEntity;
             if (playerAttemptsMounting) {
                 PlayerEntity player = (PlayerEntity) event.getEntityMounting();
-                List<IRegion> regions = RegionUtils.getHandlingRegionsFor(entityBeingMounted, event.getWorldObj());
-                for (IRegion region : regions) {
+                List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(entityBeingMounted, event.getWorldObj());
+                for (IMarkableRegion region : regions) {
 					/*
 					TODO: Wait for 1.17: https://bugs.mojang.com/browse/MC-202202
 					if (event.isDismounting() && region.containsFlag(RegionFlag.ANIMAL_UNMOUNTING) && region.forbids(player)) {

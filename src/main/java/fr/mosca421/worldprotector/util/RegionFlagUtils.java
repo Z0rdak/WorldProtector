@@ -1,7 +1,7 @@
 package fr.mosca421.worldprotector.util;
 
 import com.google.common.base.Joiner;
-import fr.mosca421.worldprotector.core.IRegion;
+import fr.mosca421.worldprotector.core.IMarkableRegion;
 import fr.mosca421.worldprotector.core.RegionFlag;
 import fr.mosca421.worldprotector.data.RegionManager;
 import net.minecraft.entity.player.PlayerEntity;
@@ -72,7 +72,7 @@ public final class RegionFlagUtils {
 		}
 	}
 
-	public static void addFlag(IRegion region, PlayerEntity player, String flag) {
+	public static void addFlag(IMarkableRegion region, PlayerEntity player, String flag) {
 		if (RegionManager.get().addFlag(region, flag)) {
 			sendMessage(player, new TranslationTextComponent("message.flags.add", flag, region.getName()));
 		} else {
@@ -80,7 +80,7 @@ public final class RegionFlagUtils {
 		}
 	}
 
-	public static void removeFlag(IRegion region, PlayerEntity player, String flag){
+	public static void removeFlag(IMarkableRegion region, PlayerEntity player, String flag){
 			if (RegionManager.get().removeFlag(region, flag)) {
 				sendMessage(player, new TranslationTextComponent("message.flags.remove", flag, region.getName()));
 			} else {
@@ -127,7 +127,7 @@ public final class RegionFlagUtils {
 		sendMessage(player, "help.flags.4");
 	}
 
-	public static String getFlagString(IRegion region) {
+	public static String getFlagString(IMarkableRegion region) {
 		return Joiner.on(", ").join(region.getFlags());
 	}
 

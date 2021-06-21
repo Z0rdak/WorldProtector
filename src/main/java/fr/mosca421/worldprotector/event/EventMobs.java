@@ -1,8 +1,11 @@
 package fr.mosca421.worldprotector.event;
 
 import fr.mosca421.worldprotector.WorldProtector;
-import fr.mosca421.worldprotector.core.IRegion;
+import fr.mosca421.worldprotector.core.IMarkableRegion;
+import fr.mosca421.worldprotector.core.IProtectedRegion;
 import fr.mosca421.worldprotector.core.RegionFlag;
+import fr.mosca421.worldprotector.data.DimensionRegionCache;
+import fr.mosca421.worldprotector.data.RegionManager;
 import fr.mosca421.worldprotector.util.MessageUtils;
 import fr.mosca421.worldprotector.util.RegionUtils;
 import net.minecraft.entity.Entity;
@@ -27,56 +30,74 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.List;
+import java.util.function.BiPredicate;
 
 @Mod.EventBusSubscriber(modid = WorldProtector.MODID)
 public class EventMobs {
 
-	private EventMobs(){}
+	private EventMobs() {
+	}
+
+	public static <T extends Entity> boolean isActionPermittedInRegion(IProtectedRegion region, T entity, BiPredicate<IProtectedRegion, T> flagPredicate) {
+		return region.hasWhitelist() != flagPredicate.test(region, entity);
+	}
+
+	public static <T extends PlayerEntity> boolean isActionAndPlayerPermittedInRegion(IProtectedRegion region, T entity, BiPredicate<IProtectedRegion, T> flagPredicate) {
+		return region.hasWhitelist() != flagPredicate.test(region, entity);
+	}
 
 	@SubscribeEvent
 	public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
-		Entity eventEntity = event.getEntity();
-		List<IRegion> affectedRegions = RegionUtils.getHandlingRegionsFor(event.getEntity().getPosition(), event.getWorld());
-		for (IRegion region : affectedRegions) {
-			if (region.containsFlag(RegionFlag.SPAWNING_ALL) && eventEntity instanceof MobEntity) {
-				event.setCanceled(true);
-				return;
-			}
-			if (region.containsFlag(RegionFlag.SPAWNING_ANIMAL) && isAnimal(eventEntity)) {
-				event.setCanceled(true);
-				return;
-			}
-			if (region.containsFlag(RegionFlag.SPAWNING_GOLEM) && eventEntity instanceof IronGolemEntity) {
-				event.setCanceled(true);
-				return;
-			}
-			if (region.containsFlag(RegionFlag.SPAWNING_MONSTERS) && isMonster(eventEntity)) {
-				event.setCanceled(true);
-				return;
-			}
-			if (region.containsFlag(RegionFlag.SPAWNING_XP) && eventEntity instanceof ExperienceOrbEntity) {
-				event.setCanceled(true);
-				return;
-			}
+		DimensionRegionCache cache = RegionManager.get().getRegionDimCache(event.getWorld().getDimensionKey());
+		boolean setCanceled = true;
+		/*
+		if (cache != null) {
+			setCanceled = isActionPermittedInRegion(cache, event.getEntity(), EventMobs::checkMobSpawning);
 		}
+		*/
+
+		List<IMarkableRegion> affectedRegions = RegionUtils.getHandlingRegionsFor(event.getEntity().getPosition(), event.getWorld());
+		for (IMarkableRegion region : affectedRegions) {
+			setCanceled = setCanceled && isActionPermittedInRegion(region, event.getEntity(), EventMobs::checkMobSpawning);
+		}
+		event.setCanceled(setCanceled);
+
 	}
 
-	// TODO: Test on Villagers and add extra flag
+	private static boolean checkMobSpawning(IProtectedRegion region, Entity eventEntity) {
+		return region.containsFlag(RegionFlag.SPAWNING_ALL.toString()) && eventEntity instanceof MobEntity
+				|| region.containsFlag(RegionFlag.SPAWNING_ANIMAL.toString()) && isAnimal(eventEntity)
+				|| region.containsFlag(RegionFlag.SPAWNING_GOLEM.toString()) && eventEntity instanceof IronGolemEntity
+				|| region.containsFlag(RegionFlag.SPAWNING_MONSTERS.toString()) && isMonster(eventEntity)
+				|| region.containsFlag(RegionFlag.SPAWNING_XP.toString()) && eventEntity instanceof ExperienceOrbEntity;
+	}
+
 	@SubscribeEvent
 	public static void onBreedingAttempt(BabyEntitySpawnEvent event) {
-		PlayerEntity player = event.getCausedByPlayer();
-		if (player != null && !player.world.isRemote) {
-			List<IRegion> regions = RegionUtils.getHandlingRegionsFor(event.getParentB().getPosition(), event.getParentB().world);
-			for (IRegion region : regions) {
-				if (region.containsFlag(RegionFlag.ANIMAL_BREEDING) && region.forbids(player)) {
-					if (!region.isMuted()) {
+		if (event.getCausedByPlayer() != null) {
+			PlayerEntity player = event.getCausedByPlayer();
+			DimensionRegionCache cache = RegionManager.get().getRegionDimCache(event.getCausedByPlayer().world.getDimensionKey());
+			boolean setCanceled = true;
+			/*
+			if (cache != null) {
+				setCanceled = isActionAndPlayerPermittedInRegion(cache, player, (region, playerEntity) -> region.containsFlag(RegionFlag.ANIMAL_BREEDING.toString()) && region.permitsPlayer(playerEntity));
+			}
+			 */
+
+			if (!player.world.isRemote) {
+				List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(event.getParentB().getPosition(), event.getParentB().world);
+				for (IMarkableRegion region : regions) {
+					boolean isCanceled = isActionAndPlayerPermittedInRegion(region, player, (r, playerEntity) -> r.containsFlag(RegionFlag.ANIMAL_BREEDING.toString()) && r.permitsPlayer(playerEntity));
+					setCanceled = setCanceled && isCanceled;
+					if (!region.isMuted() && isCanceled) {
 						MessageUtils.sendStatusMessage(player, "message.event.mobs.breed_animals");
 					}
-					event.setCanceled(true);
-					return;
 				}
 			}
+			event.setCanceled(setCanceled);
 		}
+
+
 		// TODO: test if this is fired when animals are bred without player interaction
 	}
 
@@ -85,8 +106,8 @@ public class EventMobs {
 		AnimalEntity animal = event.getAnimal();
 		PlayerEntity player = event.getTamer();
 		if (!player.world.isRemote) {
-			List<IRegion> regions = RegionUtils.getHandlingRegionsFor(animal.getPosition(), event.getAnimal().world);
-			for (IRegion region : regions) {
+			List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(animal.getPosition(), event.getAnimal().world);
+			for (IMarkableRegion region : regions) {
 				event.setCanceled(true);
 				if (!region.isMuted()) {
 					MessageUtils.sendStatusMessage(player, "message.event.mobs.tame_animal");
@@ -108,7 +129,7 @@ public class EventMobs {
 				|| entity instanceof ShulkerEntity;
 	}
 
-	private static boolean regionContainsEntity(IRegion region, Entity entity){
+	private static boolean regionContainsEntity(IMarkableRegion region, Entity entity){
 		return region.getArea().contains(entity.getPositionVec());
 	}
 
@@ -116,10 +137,10 @@ public class EventMobs {
 	public static void onAttackEntityAnimal(AttackEntityEvent event) {
 		PlayerEntity player = event.getPlayer();
 		Entity eventEntity = event.getTarget();
-		List<IRegion> affectedRegions = RegionUtils.getHandlingRegionsFor(event.getTarget().getPosition(), event.getTarget().world);
+		List<IMarkableRegion> affectedRegions = RegionUtils.getHandlingRegionsFor(event.getTarget().getPosition(), event.getTarget().world);
 		if (!event.getTarget().world.isRemote) {
 			if (isAnimal(eventEntity)) {
-				for (IRegion region : affectedRegions) {
+				for (IMarkableRegion region : affectedRegions) {
 					boolean flagDamageAnimals = region.containsFlag(RegionFlag.ATTACK_ANIMALS.toString());
 					if (flagDamageAnimals && regionContainsEntity(region, eventEntity) && region.forbids(player)) {
 						if (!region.isMuted()) {
@@ -131,7 +152,7 @@ public class EventMobs {
 			}
 
 			if (isMonster(eventEntity)) {
-				for (IRegion region : affectedRegions) {
+				for (IMarkableRegion region : affectedRegions) {
 					boolean flagDamageMonsters = region.containsFlag(RegionFlag.ATTACK_MONSTERS.toString());
 					if (flagDamageMonsters && regionContainsEntity(region, eventEntity) && region.forbids(player)) {
 						if (!region.isMuted()) {
@@ -144,7 +165,7 @@ public class EventMobs {
 
 			if (event.getTarget() instanceof VillagerEntity) { // exclude pesky wandering trader >:-)
 				VillagerEntity villager = (VillagerEntity) event.getTarget();
-				for (IRegion region : affectedRegions) {
+				for (IMarkableRegion region : affectedRegions) {
 					boolean flagDamageMonsters = region.containsFlag(RegionFlag.ATTACK_VILLAGERS.toString());
 					if (flagDamageMonsters && regionContainsEntity(region, villager) && region.forbids(player)) {
 						if (!region.isMuted()) {

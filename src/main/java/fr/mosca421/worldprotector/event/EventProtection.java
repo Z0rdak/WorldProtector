@@ -1,7 +1,7 @@
 package fr.mosca421.worldprotector.event;
 
 import fr.mosca421.worldprotector.WorldProtector;
-import fr.mosca421.worldprotector.core.IRegion;
+import fr.mosca421.worldprotector.core.IMarkableRegion;
 import fr.mosca421.worldprotector.core.RegionFlag;
 import fr.mosca421.worldprotector.util.RegionUtils;
 import net.minecraft.block.BlockState;
@@ -43,8 +43,8 @@ public class EventProtection {
 	public static void onPlayerBreakBlock(BreakEvent event) {
 		if (!event.getWorld().isRemote()) {
 			PlayerEntity player = event.getPlayer();
-			List<IRegion> regions = RegionUtils.getHandlingRegionsFor(event.getPos(), (World) event.getWorld());
-			for (IRegion region : regions) {
+			List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(event.getPos(), (World) event.getWorld());
+			for (IMarkableRegion region : regions) {
 				if (region.containsFlag(RegionFlag.BREAK) && region.forbids(player)) {
 					event.setCanceled(true);
 					if (!region.isMuted()) {
@@ -59,10 +59,10 @@ public class EventProtection {
 	@SubscribeEvent
 	public static void onPlayerPlaceBlock(EntityPlaceEvent event) {
 		if (!event.getWorld().isRemote()) {
-			List<IRegion> regions = RegionUtils.getHandlingRegionsFor(event.getPos(), (World) event.getWorld());
+			List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(event.getPos(), (World) event.getWorld());
 			if (event.getEntity() instanceof PlayerEntity) {
 				PlayerEntity player = (PlayerEntity) event.getEntity();
-				for (IRegion region : regions) {
+				for (IMarkableRegion region : regions) {
 					if (region.containsFlag(RegionFlag.PLACE) && region.forbids(player)) {
 						event.setCanceled(true);
 						if (!region.isMuted()) {
@@ -87,10 +87,10 @@ public class EventProtection {
 	@SubscribeEvent
 	public static void onExplosionStarted(ExplosionEvent.Start event) {
 		if (!event.getWorld().isRemote) {
-			List<IRegion> regions = RegionUtils.getHandlingRegionsFor(new BlockPos(event.getExplosion().getPosition()), event.getWorld());
+			List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(new BlockPos(event.getExplosion().getPosition()), event.getWorld());
 			if (event.getExplosion().getExplosivePlacedBy() instanceof PlayerEntity) {
 				PlayerEntity player = (PlayerEntity) event.getExplosion().getExplosivePlacedBy();
-				for (IRegion region : regions) {
+				for (IMarkableRegion region : regions) {
 					boolean cancelEvent = region.containsFlag(RegionFlag.IGNITE_EXPLOSIVES) && !region.permits(player);
 					event.setCanceled(cancelEvent);
 					if (cancelEvent) {
@@ -133,8 +133,8 @@ public class EventProtection {
 	public static void onPlayerUseToolSecondary(BlockEvent.BlockToolInteractEvent event) {
 		if (!event.getWorld().isRemote()) {
 			PlayerEntity player = event.getPlayer();
-			List<IRegion> regions = RegionUtils.getHandlingRegionsFor(event.getPos(), player.getEntityWorld());
-			for (IRegion region : regions){ // iterate through regions, if a region contains a specified flag, cancel event
+			List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(event.getPos(), player.getEntityWorld());
+			for (IMarkableRegion region : regions){ // iterate through regions, if a region contains a specified flag, cancel event
 				boolean playerNotPermitted = !region.permits(player);
 				if (region.containsFlag(RegionFlag.TOOL_SECONDARY_USE) && playerNotPermitted) {
 					event.setCanceled(true);
@@ -177,8 +177,8 @@ public class EventProtection {
 		// Note: FilledBucket seems to always be null. use maxStackSize to determine bucket state (empty or filled)
 		PlayerEntity player = event.getPlayer();
 		if (!event.getWorld().isRemote && event.getTarget() != null) {
-			List<IRegion> regions = RegionUtils.getHandlingRegionsFor(new BlockPos(event.getTarget().getHitVec()), event.getWorld());
-			for (IRegion region : regions) {
+			List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(new BlockPos(event.getTarget().getHitVec()), event.getWorld());
+			for (IMarkableRegion region : regions) {
 				// MaxStackSize: 1 -> full bucket so only placeable; >1 -> empty bucket, only fillable
 				int bucketItemMaxStackCount = event.getEmptyBucket().getMaxStackSize();
 
@@ -240,13 +240,13 @@ public class EventProtection {
 			List<BlockPos> blockToMove = event.getStructureHelper().getBlocksToMove();
 			blockToMove.forEach( pos -> WorldProtector.LOGGER.debug(pos.toString()));
 
-			List<IRegion> regionsPushedIn = blockToMove.stream()
+			List<IMarkableRegion> regionsPushedIn = blockToMove.stream()
 					.map(pos -> RegionUtils.getHandlingRegionsFor(pos, (World) event.getWorld()))
 					.flatMap(Collection::stream)
 					.distinct()
 					.collect(Collectors.toList());
 
-			for (IRegion region : regionsPushedIn) {
+			for (IMarkableRegion region : regionsPushedIn) {
 				if (region.containsFlag(PISTON_PUSH)) {
 					event.setCanceled(true);
 					return;
@@ -274,7 +274,7 @@ public class EventProtection {
 	 * @param flag flag to be checked for
 	 * @return true if any region contains the specified flag, false otherwise
 	 */
-	private static boolean anyRegionContainsFlag(List<IRegion> regions, String flag){
+	private static boolean anyRegionContainsFlag(List<IMarkableRegion> regions, String flag){
 		return regions.stream()
 				.anyMatch(region -> region.containsFlag(flag));
 	}

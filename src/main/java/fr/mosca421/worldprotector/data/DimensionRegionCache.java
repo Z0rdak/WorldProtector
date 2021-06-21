@@ -1,7 +1,8 @@
 package fr.mosca421.worldprotector.data;
 
-import fr.mosca421.worldprotector.core.IRegion;
+import fr.mosca421.worldprotector.core.IMarkableRegion;
 import fr.mosca421.worldprotector.core.Region;
+import fr.mosca421.worldprotector.core.RegionFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -12,17 +13,17 @@ import net.minecraftforge.common.util.INBTSerializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class DimensionRegionCache extends HashMap<String, IRegion> implements INBTSerializable<CompoundNBT> {
+public class DimensionRegionCache extends HashMap<String, IMarkableRegion> implements INBTSerializable<CompoundNBT> {
 
     public static final String WHITELIST = "whitelist"; // boolean
     public static final String FLAGS = "flags"; // list
     public static final String REGIONS = "regions";  //compound
-    public static final String PROTECTORS = "protectors"; // list of uuid?
-    public Collection<String> dimensionFlags;
-    public Collection<String> protectors;
-    public boolean hasWhitelist;
+    public static final String PROTECTORS = "protectors";
+    private final Map<UUID, String> protectors;
+    private Collection<String> dimensionFlags;
+    private boolean hasWhitelist;
 
-    public DimensionRegionCache(IRegion region) {
+    public DimensionRegionCache(IMarkableRegion region) {
         this();
         addRegion(region);
     }
@@ -30,13 +31,45 @@ public class DimensionRegionCache extends HashMap<String, IRegion> implements IN
     public DimensionRegionCache() {
         super();
         this.dimensionFlags = new ArrayList<>(0);
-        this.protectors = new ArrayList<>(0);
+        this.protectors = new HashMap<>(0);
         this.hasWhitelist = true;
     }
 
     public DimensionRegionCache(CompoundNBT nbt) {
         this();
         deserializeNBT(nbt);
+    }
+
+    public boolean addFlag(String flag) {
+        return this.dimensionFlags.add(flag);
+    }
+
+    public boolean removeFlag(String flag) {
+        return this.dimensionFlags.remove(flag);
+    }
+
+    public Collection<String> getDimensionFlags() {
+        return Collections.unmodifiableCollection(this.dimensionFlags);
+    }
+
+    public boolean hasFlagActive(String flag) {
+        return this.dimensionFlags.contains(flag);
+    }
+
+    public boolean hasFlagActive(RegionFlag flag) {
+        if (this.dimensionFlags.contains(flag.toString())) {
+            return !this.hasWhitelist;
+        } else {
+            return this.hasWhitelist;
+        }
+    }
+
+    public boolean hasWhitelist() {
+        return this.hasWhitelist;
+    }
+
+    public void setHasWhitelist(boolean hasWhitelist) {
+        this.hasWhitelist = hasWhitelist;
     }
 
     public boolean isActive(String regionName) {
@@ -62,7 +95,7 @@ public class DimensionRegionCache extends HashMap<String, IRegion> implements IN
         return false;
     }
 
-    public Collection<IRegion> getRegions() {
+    public Collection<IMarkableRegion> getRegions() {
         return Collections.unmodifiableCollection(this.values());
     }
 
@@ -70,7 +103,7 @@ public class DimensionRegionCache extends HashMap<String, IRegion> implements IN
         return Collections.unmodifiableCollection(this.keySet());
     }
 
-    public IRegion removeRegion(String regionName) {
+    public IMarkableRegion removeRegion(String regionName) {
         return this.remove(regionName);
     }
 
@@ -79,7 +112,7 @@ public class DimensionRegionCache extends HashMap<String, IRegion> implements IN
     }
 
     // TODO: rework to only update area?
-    public void updateRegion(IRegion newRegion) {
+    public void updateRegion(IMarkableRegion newRegion) {
         if (this.containsKey(newRegion.getName())) {
             this.put(newRegion.getName(), newRegion);
         }
@@ -95,11 +128,11 @@ public class DimensionRegionCache extends HashMap<String, IRegion> implements IN
      * @param regionName regionName to get corresponding region object for
      * @return region object corresponding to region name
      */
-    public IRegion getRegion(String regionName) {
+    public IMarkableRegion getRegion(String regionName) {
         return this.get(regionName);
     }
 
-    public void addRegion(IRegion region) {
+    public void addRegion(IMarkableRegion region) {
         this.put(region.getName(), region);
     }
 
@@ -111,14 +144,14 @@ public class DimensionRegionCache extends HashMap<String, IRegion> implements IN
         return new HashSet<>();
     }
 
-    public boolean removeFlag(IRegion region, String flag) {
+    public boolean removeFlag(IMarkableRegion region, String flag) {
         if (this.containsKey(region.getName())) {
             return this.get(region.getName()).removeFlag(flag);
         }
         return false;
     }
 
-    public boolean addFlag(IRegion region, String flag) {
+    public boolean addFlag(IMarkableRegion region, String flag) {
         if (this.containsKey(region.getName())) {
             return this.get(region.getName()).addFlag(flag);
         }
@@ -194,7 +227,7 @@ public class DimensionRegionCache extends HashMap<String, IRegion> implements IN
 
     public static CompoundNBT serializeCache(DimensionRegionCache dimensionRegionCache) {
         CompoundNBT dimCache = new CompoundNBT();
-        for (Map.Entry<String, IRegion> regionEntry : dimensionRegionCache.entrySet()) {
+        for (Map.Entry<String, IMarkableRegion> regionEntry : dimensionRegionCache.entrySet()) {
             dimCache.put(regionEntry.getKey(), regionEntry.getValue().serializeNBT());
         }
         return dimCache;
@@ -214,7 +247,7 @@ public class DimensionRegionCache extends HashMap<String, IRegion> implements IN
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         CompoundNBT regions = new CompoundNBT();
-        for (Map.Entry<String, IRegion> regionEntry : this.entrySet()) {
+        for (Map.Entry<String, IMarkableRegion> regionEntry : this.entrySet()) {
             regions.put(regionEntry.getKey(), regionEntry.getValue().serializeNBT());
         }
         nbt.put(REGIONS, regions);
@@ -243,15 +276,27 @@ public class DimensionRegionCache extends HashMap<String, IRegion> implements IN
 
         this.dimensionFlags.clear();
         ListNBT flagsNBT = nbt.getList(FLAGS, Constants.NBT.TAG_STRING);
-        for (int i = 0; i < flagsNBT.size(); i++) {
-            this.dimensionFlags.add(flagsNBT.getString(i));
+        if (flagsNBT.size() == 0) {
+            this.dimensionFlags = new ArrayList<>(0);
+        } else {
+            for (int i = 0; i < flagsNBT.size(); i++) {
+                this.dimensionFlags.add(flagsNBT.getString(i));
+            }
         }
 
         this.protectors.clear();
+        // TODO
+        /*
         ListNBT protectorsNBT = nbt.getList(PROTECTORS, Constants.NBT.TAG_STRING);
-        for (int i = 0; i < protectorsNBT.size(); i++) {
-            this.dimensionFlags.add(protectorsNBT.getString(i));
+        if (flagsNBT.size() == 0) {
+            this.protectors = new ArrayList<>(0);
+        } else {
+            for (int i = 0; i < protectorsNBT.size(); i++) {
+                this.protectors.add(protectorsNBT.getString(i));
+            }
         }
+
+         */
 
         this.hasWhitelist = nbt.getBoolean(WHITELIST);
     }

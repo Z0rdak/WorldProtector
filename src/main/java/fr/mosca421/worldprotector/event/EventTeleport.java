@@ -1,7 +1,7 @@
 package fr.mosca421.worldprotector.event;
 
 import fr.mosca421.worldprotector.WorldProtector;
-import fr.mosca421.worldprotector.core.IRegion;
+import fr.mosca421.worldprotector.core.IMarkableRegion;
 import fr.mosca421.worldprotector.core.RegionFlag;
 import fr.mosca421.worldprotector.util.MessageUtils;
 import fr.mosca421.worldprotector.util.RegionUtils;
@@ -28,8 +28,8 @@ public class EventTeleport {
         if (!world.isRemote()) {
             BlockPos teleportTarget = new BlockPos(event.getTargetX(), event.getTargetY(), event.getTargetZ());
             BlockPos teleportSource = event.getEntity().getPosition();
-            List<IRegion> regionsTo = RegionUtils.getHandlingRegionsFor(teleportTarget, world);
-            List<IRegion> regionsFrom = RegionUtils.getHandlingRegionsFor(teleportSource, world);
+            List<IMarkableRegion> regionsTo = RegionUtils.getHandlingRegionsFor(teleportTarget, world);
+            List<IMarkableRegion> regionsFrom = RegionUtils.getHandlingRegionsFor(teleportSource, world);
             // handle player teleportation using ender pearls
             if (event instanceof EntityTeleportEvent.EnderPearl) {
                 EntityTeleportEvent.EnderPearl enderPearlEvent = (EntityTeleportEvent.EnderPearl) event;
@@ -49,9 +49,9 @@ public class EventTeleport {
         }
     }
 
-    private static void handlePlayerEnderPearlUse(EntityTeleportEvent.EnderPearl event, List<IRegion> regionsFrom, List<IRegion> regionsTo) {
+    private static void handlePlayerEnderPearlUse(EntityTeleportEvent.EnderPearl event, List<IMarkableRegion> regionsFrom, List<IMarkableRegion> regionsTo) {
         PlayerEntity player = event.getPlayer();
-        for (IRegion region : regionsFrom) {
+        for (IMarkableRegion region : regionsFrom) {
             if (region.containsFlag(RegionFlag.USE_ENDERPEARL_FROM_REGION) && region.forbids(player)) {
                 event.setCanceled(true);
                 if (!region.isMuted()) {
@@ -63,7 +63,7 @@ public class EventTeleport {
                 return;
             }
         }
-        for (IRegion region : regionsFrom) {
+        for (IMarkableRegion region : regionsFrom) {
             if (region.containsFlag(RegionFlag.USE_ENDERPEARL_TO_REGION) && region.forbids(player)) {
                 event.setCanceled(true);
                 if (!region.isMuted()) {
@@ -78,7 +78,7 @@ public class EventTeleport {
 
     }
 
-    private static void handleShulkerTp(EntityTeleportEvent.EnderEntity event, List<IRegion> regionsFrom, List<IRegion> regionsTo) {
+    private static void handleShulkerTp(EntityTeleportEvent.EnderEntity event, List<IMarkableRegion> regionsFrom, List<IMarkableRegion> regionsTo) {
         boolean shulkerTpFromProhibited = regionsFrom.stream()
                 .anyMatch(region -> region.containsFlag(RegionFlag.SHULKER_TELEPORT_FROM_REGION));
         if (shulkerTpFromProhibited) {
@@ -91,7 +91,7 @@ public class EventTeleport {
         }
     }
 
-    private static void handleEndermanTp(EntityTeleportEvent.EnderEntity event, List<IRegion> regionsFrom, List<IRegion> regionsTo) {
+    private static void handleEndermanTp(EntityTeleportEvent.EnderEntity event, List<IMarkableRegion> regionsFrom, List<IMarkableRegion> regionsTo) {
         boolean endermanTpFromProhibited = regionsFrom.stream()
                 .anyMatch(region -> region.containsFlag(RegionFlag.ENDERMAN_TELEPORT_FROM_REGION));
         if (endermanTpFromProhibited) {

@@ -2,7 +2,7 @@ package fr.mosca421.worldprotector.data;
 
 import fr.mosca421.worldprotector.WorldProtector;
 import fr.mosca421.worldprotector.api.event.RegionEvent;
-import fr.mosca421.worldprotector.core.IRegion;
+import fr.mosca421.worldprotector.core.IMarkableRegion;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
@@ -25,11 +25,17 @@ public class RegionManager extends WorldSavedData {
     public static final String TAG_REGIONS = "regions";
     private static final String DATA_NAME = WorldProtector.MODID;
     /**
-     * Dimension -> { RegionName -> IRegion }
+     * Dimension -> { RegionName -> IMarkableRegion }
      */
     private static final Map<RegistryKey<World>, DimensionRegionCache> regionMap = new HashMap<>();
     // Data instance
     private static RegionManager clientRegionCopy = new RegionManager();
+
+    static {
+        regionMap.put(World.OVERWORLD, new DimensionRegionCache());
+        regionMap.put(World.THE_NETHER, new DimensionRegionCache());
+        regionMap.put(World.THE_END, new DimensionRegionCache());
+    }
 
     private RegionManager() {
         super(DATA_NAME);
@@ -98,6 +104,7 @@ public class RegionManager extends WorldSavedData {
             dimRegionNbtData.put(dim, dimCompound);
         }
         compound.put(TAG_REGIONS, dimRegionNbtData);
+        // TODO: version string
         return compound;
     }
 
@@ -115,14 +122,14 @@ public class RegionManager extends WorldSavedData {
                 .findFirst();
     }
 
-    public Optional<IRegion> getRegionInDim(RegistryKey<World> dim, String regionName) {
+    public Optional<IMarkableRegion> getRegionInDim(RegistryKey<World> dim, String regionName) {
         if (regionMap.containsKey(dim) && regionMap.get(dim).containsKey(regionName)) {
             return Optional.of(regionMap.get(dim).get(regionName));
         }
         return Optional.empty();
     }
 
-    public void addRegionToDim(IRegion region) {
+    public void addRegionToDim(IMarkableRegion region) {
         RegistryKey<World> dim = region.getDimension();
         if (regionMap.containsKey(dim)) {
             regionMap.get(dim).put(region.getName(), region);
@@ -134,7 +141,7 @@ public class RegionManager extends WorldSavedData {
     }
 
     public boolean isActive(String regionName) {
-        Optional<DimensionRegionCache> maybeCache = getRegionDimCache(regionName);
+        Optional<DimensionRegionCache> maybeCache = getRegionDimCacheForRegion(regionName);
         if (maybeCache.isPresent()) {
             DimensionRegionCache cache = maybeCache.get();
             return cache.isActive(regionName);
@@ -143,9 +150,9 @@ public class RegionManager extends WorldSavedData {
     }
 
     public boolean setActiveState(String regionName, boolean active) {
-        Optional<IRegion> maybeRegion = getRegion(regionName);
+        Optional<IMarkableRegion> maybeRegion = getRegion(regionName);
         if (maybeRegion.isPresent()) {
-            IRegion region = maybeRegion.get();
+            IMarkableRegion region = maybeRegion.get();
             boolean wasUpdated = regionMap.get(region.getDimension()).setIsActive(regionName, active);
             if (wasUpdated) {
                 markDirty();
@@ -157,9 +164,9 @@ public class RegionManager extends WorldSavedData {
     }
 
     public boolean setMutedState(String regionName, boolean isMuted) {
-        Optional<IRegion> maybeRegion = getRegion(regionName);
+        Optional<IMarkableRegion> maybeRegion = getRegion(regionName);
         if (maybeRegion.isPresent()) {
-            IRegion region = maybeRegion.get();
+            IMarkableRegion region = maybeRegion.get();
             boolean wasUpdated = regionMap.get(region.getDimension()).setIsMuted(regionName, isMuted);
             if (wasUpdated) {
                 markDirty();
@@ -170,24 +177,24 @@ public class RegionManager extends WorldSavedData {
         }
     }
 
-    public Collection<IRegion> getAllRegionsFor(RegistryKey<World> dim) {
+    public Collection<IMarkableRegion> getAllRegionsFor(RegistryKey<World> dim) {
         if (regionMap.containsKey(dim)) {
             return regionMap.get(dim).getRegions();
         }
         return new ArrayList<>(0);
     }
 
-    public Collection<IRegion> getAllRegions() {
+    public Collection<IMarkableRegion> getAllRegions() {
         return regionMap.values().stream()
                 .flatMap(regionCache -> regionCache.getRegions().stream())
                 .collect(Collectors.toList());
     }
 
-    public Collection<IRegion> getAllRegionsSorted() {
+    public Collection<IMarkableRegion> getAllRegionsSorted() {
         return regionMap.values().stream()
                 .flatMap(regionCache -> regionCache.getRegions()
                         .stream()
-                        .sorted(Comparator.comparing(IRegion::getName)))
+                        .sorted(Comparator.comparing(IMarkableRegion::getName)))
                 .collect(Collectors.toList());
     }
 
@@ -204,7 +211,7 @@ public class RegionManager extends WorldSavedData {
         return Collections.emptySet();
     }
 
-    public Collection<IRegion> getRegions(RegistryKey<World> dim) {
+    public Collection<IMarkableRegion> getRegions(RegistryKey<World> dim) {
         if (regionMap.containsKey(dim)) {
             return regionMap.get(dim).getRegions();
         }
@@ -213,7 +220,7 @@ public class RegionManager extends WorldSavedData {
 
     public boolean removeRegion(String regionName, RegistryKey<World> dim) {
         if (regionMap.containsKey(dim)) {
-            IRegion removed = regionMap.get(dim).remove(regionName);
+            IMarkableRegion removed = regionMap.get(dim).remove(regionName);
             markDirty();
             return removed != null;
         }
@@ -231,18 +238,18 @@ public class RegionManager extends WorldSavedData {
         markDirty();
     }
 
-    private void removeRegion(IRegion region) {
+    private void removeRegion(IMarkableRegion region) {
         if (containsDimensionFor(region)) {
             regionMap.get(region.getDimension()).remove(region.getName());
             markDirty();
         }
     }
 
-    public IRegion removeRegion(String regionName, PlayerEntity player) {
-        Optional<IRegion> maybeRegion = getRegion(regionName);
+    public IMarkableRegion removeRegion(String regionName, PlayerEntity player) {
+        Optional<IMarkableRegion> maybeRegion = getRegion(regionName);
         if (maybeRegion.isPresent()) {
-            IRegion region = maybeRegion.get();
-            IRegion removed = regionMap.get(region.getDimension()).removeRegion(regionName);
+            IMarkableRegion region = maybeRegion.get();
+            IMarkableRegion removed = regionMap.get(region.getDimension()).removeRegion(regionName);
             markDirty();
             MinecraftForge.EVENT_BUS.post(new RegionEvent.RemoveRegionEvent(region, player));
             return removed;
@@ -251,17 +258,24 @@ public class RegionManager extends WorldSavedData {
         }
     }
 
-    public Optional<IRegion> getRegion(String regionName) {
+    public Optional<IMarkableRegion> getRegion(String regionName) {
         return regionMap.values().stream()
                 .filter(regionCache -> regionCache.containsKey(regionName)) // one remaining
                 .map(regionCache -> regionCache.getRegion(regionName))
                 .findFirst();
     }
 
-    public Optional<DimensionRegionCache> getRegionDimCache(String regionName) {
+    public Optional<DimensionRegionCache> getRegionDimCacheForRegion(String regionName) {
         return regionMap.values().stream()
                 .filter(regionCache -> regionCache.containsKey(regionName))
                 .findFirst();
+    }
+
+    public DimensionRegionCache getRegionDimCache(RegistryKey<World> dim) {
+        if (regionMap.containsKey(dim)) {
+            return regionMap.get(dim);
+        }
+        return null;
     }
 
     public boolean containsRegion(String regionName, RegistryKey<World> dim) {
@@ -290,18 +304,17 @@ public class RegionManager extends WorldSavedData {
      * @param dim
      * @return
      */
-    public Optional<IRegion> getRegion(String regionName, RegistryKey<World> dim) {
+    public Optional<IMarkableRegion> getRegion(String regionName, RegistryKey<World> dim) {
         if (regionMap.containsKey(dim) && regionMap.get(dim).containsKey(regionName)) {
             return Optional.of(regionMap.get(dim).getRegion(regionName));
         }
         return Optional.empty();
     }
 
-    public boolean containsDimensionFor(IRegion region) {
+    public boolean containsDimensionFor(IMarkableRegion region) {
         return regionMap.containsKey(region.getDimension());
     }
 
-    // Flag methods
     public Set<String> getRegionFlags(String regionName, RegistryKey<World> dim) {
         if (regionMap.containsKey(dim)) {
             return regionMap.get(dim).getFlags(regionName);
@@ -309,7 +322,7 @@ public class RegionManager extends WorldSavedData {
         return new HashSet<>();
     }
 
-    public void updateRegion(IRegion newRegion, PlayerEntity player) {
+    public void updateRegion(IMarkableRegion newRegion, PlayerEntity player) {
         RegistryKey<World> dim = newRegion.getDimension();
         if (regionMap.containsKey(dim)) {
             regionMap.get(dim).updateRegion(newRegion);
@@ -318,17 +331,11 @@ public class RegionManager extends WorldSavedData {
         }
     }
 
-    /**
-     * Always check contains first!
-     *
-     * @param region
-     * @return
-     */
-    private DimensionRegionCache getCache(IRegion region) {
+    private DimensionRegionCache getCache(IMarkableRegion region) {
         return regionMap.get(region.getDimension());
     }
 
-    public boolean removeFlag(IRegion region, String flag) {
+    public boolean removeFlag(IMarkableRegion region, String flag) {
         if (containsDimensionFor(region)) {
             boolean wasRemoved = getCache(region).removeFlag(region, flag);
             if (wasRemoved) {
@@ -340,7 +347,7 @@ public class RegionManager extends WorldSavedData {
     }
 
     public List<String> removeFlags(String regionName, List<String> flags) {
-        Optional<DimensionRegionCache> maybeCache = getRegionDimCache(regionName);
+        Optional<DimensionRegionCache> maybeCache = getRegionDimCacheForRegion(regionName);
         if (maybeCache.isPresent()) {
             List<String> removed = maybeCache.get().removeFlags(regionName, flags);
             markDirty();
@@ -351,7 +358,7 @@ public class RegionManager extends WorldSavedData {
     }
 
     public List<String> addFlags(String regionName, List<String> flags) {
-        Optional<DimensionRegionCache> maybeCache = getRegionDimCache(regionName);
+        Optional<DimensionRegionCache> maybeCache = getRegionDimCacheForRegion(regionName);
         if (maybeCache.isPresent()) {
             List<String> added = maybeCache.get().addFlags(regionName, flags);
             markDirty();
@@ -363,7 +370,7 @@ public class RegionManager extends WorldSavedData {
 
     /* Player related methods */
 
-    public boolean addFlag(IRegion region, String flag) {
+    public boolean addFlag(IMarkableRegion region, String flag) {
         if (containsDimensionFor(region)) {
             boolean wasAdded = getCache(region).addFlag(region, flag);
             if (wasAdded) {
@@ -382,7 +389,7 @@ public class RegionManager extends WorldSavedData {
     }
 
     public boolean addPlayer(String regionName, PlayerEntity player) {
-        Optional<DimensionRegionCache> maybeCache = getRegionDimCache(regionName);
+        Optional<DimensionRegionCache> maybeCache = getRegionDimCacheForRegion(regionName);
         if (maybeCache.isPresent()) {
             boolean wasAdded = maybeCache.get().addPlayer(regionName, player);
             if (wasAdded) {
@@ -394,7 +401,7 @@ public class RegionManager extends WorldSavedData {
     }
 
     public List<PlayerEntity> addPlayers(String regionName, List<PlayerEntity> playersToAdd) {
-        Optional<DimensionRegionCache> maybeCache = getRegionDimCache(regionName);
+        Optional<DimensionRegionCache> maybeCache = getRegionDimCacheForRegion(regionName);
         if (maybeCache.isPresent()) {
             List<PlayerEntity> added = maybeCache.get().addPlayers(regionName, playersToAdd);
             markDirty();
@@ -405,7 +412,7 @@ public class RegionManager extends WorldSavedData {
     }
 
     public boolean removePlayer(String regionName, PlayerEntity player) {
-        Optional<DimensionRegionCache> maybeCache = getRegionDimCache(regionName);
+        Optional<DimensionRegionCache> maybeCache = getRegionDimCacheForRegion(regionName);
         if (maybeCache.isPresent()) {
             boolean wasRemoved = maybeCache.get().removePlayer(regionName, player);
             if (wasRemoved) {
@@ -417,7 +424,7 @@ public class RegionManager extends WorldSavedData {
     }
 
     public List<PlayerEntity> removePlayers(String regionName, List<PlayerEntity> playersToRemove) {
-        Optional<DimensionRegionCache> maybeCache = getRegionDimCache(regionName);
+        Optional<DimensionRegionCache> maybeCache = getRegionDimCacheForRegion(regionName);
         if (maybeCache.isPresent()) {
             List<PlayerEntity> removed = maybeCache.get().removePlayers(regionName, playersToRemove);
             markDirty();
@@ -428,7 +435,7 @@ public class RegionManager extends WorldSavedData {
     }
 
     public boolean forbidsPlayer(String regionName, PlayerEntity player) {
-        Optional<DimensionRegionCache> maybeCache = getRegionDimCache(regionName);
+        Optional<DimensionRegionCache> maybeCache = getRegionDimCacheForRegion(regionName);
         return maybeCache
                 .map(dimensionRegionCache -> dimensionRegionCache.forbidsPlayer(regionName, player))
                 .orElse(true);
@@ -437,7 +444,7 @@ public class RegionManager extends WorldSavedData {
     // Data
 
     public Set<String> getRegionPlayers(String regionName) {
-        Optional<DimensionRegionCache> maybeCache = getRegionDimCache(regionName);
+        Optional<DimensionRegionCache> maybeCache = getRegionDimCacheForRegion(regionName);
         if (maybeCache.isPresent()) {
             DimensionRegionCache regionCache = maybeCache.get();
             if (regionCache.containsKey(regionName)) {
@@ -447,7 +454,25 @@ public class RegionManager extends WorldSavedData {
         return new HashSet<>();
     }
 
-    public void addRegion(IRegion region, PlayerEntity player) {
+    public void addFlagToDim(RegistryKey<World> dimension, String flag) {
+        if (regionMap.containsKey(dimension)) {
+            regionMap.get(dimension).addFlag(flag);
+        }
+    }
+
+    public void removeFlagFromDim(RegistryKey<World> dimension, String flag) {
+        if (regionMap.containsKey(dimension)) {
+            regionMap.get(dimension).removeFlag(flag);
+        }
+    }
+
+    public void setDimHasWhitelist(RegistryKey<World> dimension, boolean setWhitelist) {
+        if (regionMap.containsKey(dimension)) {
+            regionMap.get(dimension).setHasWhitelist(setWhitelist);
+        }
+    }
+
+    public void addRegion(IMarkableRegion region, PlayerEntity player) {
         if (regionMap.containsKey(region.getDimension())) {
             regionMap.get(region.getDimension()).addRegion(region);
         } else {
