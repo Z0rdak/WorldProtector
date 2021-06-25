@@ -6,6 +6,11 @@ import net.minecraft.nbt.CompoundNBT;
 
 import java.util.*;
 
+/**
+ * A abstract region represents the basic implementation of a IProtectedRegion.
+ * This abstraction can be used for markable regions as well as regions without
+ * a area (dimensions).
+ */
 public abstract class AbstractRegion implements IProtectedRegion {
 
     protected Set<String> flags;

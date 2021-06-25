@@ -1,7 +1,7 @@
 package fr.mosca421.worldprotector.data;
 
+import fr.mosca421.worldprotector.core.CuboidRegion;
 import fr.mosca421.worldprotector.core.IMarkableRegion;
-import fr.mosca421.worldprotector.core.Region;
 import fr.mosca421.worldprotector.core.RegionFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -237,7 +237,7 @@ public class DimensionRegionCache extends HashMap<String, IMarkableRegion> imple
         DimensionRegionCache dimCache = new DimensionRegionCache();
         for (String regionKey : nbt.keySet()) {
             CompoundNBT regionNbt = nbt.getCompound(regionKey);
-            Region region = new Region(regionNbt);
+            CuboidRegion region = new CuboidRegion(regionNbt);
             dimCache.addRegion(region);
         }
         return dimCache;
@@ -270,7 +270,7 @@ public class DimensionRegionCache extends HashMap<String, IMarkableRegion> imple
         CompoundNBT regions = nbt.getCompound(REGIONS);
         for (String regionKey : regions.keySet()) {
             CompoundNBT regionNbt = regions.getCompound(regionKey);
-            Region region = new Region(regionNbt);
+            CuboidRegion region = new CuboidRegion(regionNbt);
             this.addRegion(region);
         }
 

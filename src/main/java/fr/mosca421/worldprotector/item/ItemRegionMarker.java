@@ -188,15 +188,15 @@ public class ItemRegionMarker extends Item {
 	public void inventoryTick(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
 		super.inventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
 		if (!worldIn.isRemote && !stack.hasTag()) {
-			WorldProtector.LOGGER.info("Region Marker nbt initialized");
-			CompoundNBT nbt = new CompoundNBT();
-			nbt.putInt(CYCLE_POINT_ID, 0);
-			nbt.putBoolean(VALID, false);
-			nbt.putDouble(Y_DEFAULT_LOW, 0);
-			nbt.putDouble(Y_DEFAULT_HIGH, 255);
-			nbt.putBoolean(TP_TARGET_SET, false);
-			stack.setTag(nbt);
-		}
+            WorldProtector.LOGGER.info("CuboidRegion Marker nbt initialized");
+            CompoundNBT nbt = new CompoundNBT();
+            nbt.putInt(CYCLE_POINT_ID, 0);
+            nbt.putBoolean(VALID, false);
+            nbt.putDouble(Y_DEFAULT_LOW, 0);
+            nbt.putDouble(Y_DEFAULT_HIGH, 255);
+            nbt.putBoolean(TP_TARGET_SET, false);
+            stack.setTag(nbt);
+        }
 	}
 
 	private boolean isValidRegion(ItemStack markStick){

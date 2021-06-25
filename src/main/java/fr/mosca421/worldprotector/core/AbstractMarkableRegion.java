@@ -1,43 +1,43 @@
 package fr.mosca421.worldprotector.core;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import java.util.HashMap;
-import java.util.HashSet;
-
+/**
+ * The AbstractMarkableRegion represents a abstract implementation for a markable region.
+ * This can be used to implement different types of regions which define their area in a different way.
+ */
 public abstract class AbstractMarkableRegion extends AbstractRegion implements IMarkableRegion {
+
+    public final static String CUBOID = "cuboid";
 
     protected String name;
     protected int priority;
     protected RegistryKey<World> dimension;
     protected AxisAlignedBB area;
     protected boolean isMuted;
+    /* NOTE: The area type is not yet used, since there is only one the of area,
+    the Cuboid (AxisAllingedBB). But even if the value is not used, it is still stored
+     */
     protected String areaType;
-    private BlockPos tpTarget;
+    protected BlockPos tpTarget;
 
     public AbstractMarkableRegion(String name, AxisAlignedBB area, RegistryKey<World> dimension) {
         this();
         this.name = name;
         this.dimension = dimension;
-        // TODO: area can not be set here, because are for cuboid and prism is different
         this.area = area;
+        this.areaType = CUBOID;
     }
 
     protected AbstractMarkableRegion() {
         this.priority = 2;
-        this.isActive = true;
-        this.hasWhitelist = false;
         this.isMuted = false;
-        this.players = new HashMap<>(0);
-        this.flags = new HashSet<>(0);
     }
 
-    @Override
     public abstract AxisAlignedBB getArea();
 
     @Override
@@ -75,7 +75,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
 
     @Override
     public BlockPos getTpTarget() {
-        return this.tpTarget;
+        return new BlockPos(this.tpTarget);
     }
 
     @Override
@@ -83,11 +83,13 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         this.tpTarget = tpPos;
     }
 
+    // TODO:
     @Override
     public CompoundNBT serializeNBT(){
         return null;
     }
 
+    // TODO:
     @Override
     public abstract void deserializeNBT(CompoundNBT nbt);
 }

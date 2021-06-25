@@ -6,6 +6,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
+/**
+ * The DimensionalRegion represents the only implementation of an Abstract region.
+ * It is intended to be used to protect dimensions (vanilla and modded).
+ */
 public final class DimensionalRegion extends AbstractRegion {
 
     private final RegistryKey<World> dimensionKey;
@@ -14,6 +18,7 @@ public final class DimensionalRegion extends AbstractRegion {
         super();
         this.dimensionKey = dimensionKey;
     }
+
     public DimensionalRegion(String dimensionKey){
         this(RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(dimensionKey)));
     }

@@ -103,17 +103,17 @@ public final class RegionFlagUtils {
 
 	public static void listRegionFlags(PlayerEntity player, String regionName) {
 		RegionManager.get().getRegion(regionName).ifPresent(region -> {
-			sendMessage(player, new TranslationTextComponent(TextFormatting.AQUA + "== Flags in Region '" + regionName + " ' =="));
-			if (region.getFlags().isEmpty()) {
-				sendMessage(player, new TranslationTextComponent("message.region.info.noflags"));
-				return;
-			}
-			region.getFlags().forEach(flag -> {
-				IFormattableTextComponent flagComponent = new StringTextComponent(" - '" + flag + "' ")
-						.appendSibling(TextComponentUtils.wrapWithSquareBrackets(new StringTextComponent("x"))
-								.setStyle(Style.EMPTY.setColor(Color.fromTextFormatting(TextFormatting.RED))
-										.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/wp flag remove " + regionName + " " + flag))
-										.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Remove flag '" + flag + "'")))));
+            sendMessage(player, new TranslationTextComponent(TextFormatting.AQUA + "== Flags in CuboidRegion '" + regionName + " ' =="));
+            if (region.getFlags().isEmpty()) {
+                sendMessage(player, new TranslationTextComponent("message.region.info.noflags"));
+                return;
+            }
+            region.getFlags().forEach(flag -> {
+                IFormattableTextComponent flagComponent = new StringTextComponent(" - '" + flag + "' ")
+                        .appendSibling(TextComponentUtils.wrapWithSquareBrackets(new StringTextComponent("x"))
+                                .setStyle(Style.EMPTY.setColor(Color.fromTextFormatting(TextFormatting.RED))
+                                        .setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/wp flag remove " + regionName + " " + flag))
+                                        .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Remove flag '" + flag + "'")))));
 				sendMessage(player, flagComponent);
 			});
 		});

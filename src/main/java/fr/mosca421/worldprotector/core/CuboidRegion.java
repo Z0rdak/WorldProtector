@@ -1,8 +1,5 @@
 package fr.mosca421.worldprotector.core;
 
-import fr.mosca421.worldprotector.util.RegionPlayerUtils;
-import joptsimple.internal.Strings;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
@@ -14,12 +11,14 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants.NBT;
 
-import java.util.*;
 import java.util.stream.Collectors;
 
-public final class Region extends AbstractMarkableRegion {
+/**
+ * A cuboid regions represents it's area as a simple rectangular cuboid (a BlockBox).
+ * The region is marked with two blocks representing the bounding box of the area.
+ */
+public final class CuboidRegion extends AbstractMarkableRegion {
 
-	private BlockPos tpTarget;
 	// nbt keys
 	public static final String TP_X = "tp_x";
 	public static final String TP_Y = "tp_y";
@@ -46,11 +45,11 @@ public final class Region extends AbstractMarkableRegion {
 	public static final String VERSION = "version";
 	public static final String DATA_VERSION = "2.1.5.2";
 
-	public Region(CompoundNBT nbt) {
+	public CuboidRegion(CompoundNBT nbt) {
 		deserializeNBT(nbt);
 	}
 
-	public Region(String name, AxisAlignedBB area, RegistryKey<World> dimension) {
+	public CuboidRegion(String name, AxisAlignedBB area, RegistryKey<World> dimension) {
 		super(name, area, dimension);
 		this.area = area;
 		this.tpTarget = new BlockPos((int) this.area.getCenter().getX(),
@@ -58,7 +57,7 @@ public final class Region extends AbstractMarkableRegion {
 				(int) this.area.getCenter().getZ());
 	}
 
-	public Region(String name, AxisAlignedBB area, BlockPos tpPos, RegistryKey<World> dimension) {
+	public CuboidRegion(String name, AxisAlignedBB area, BlockPos tpPos, RegistryKey<World> dimension) {
 		super(name, area, dimension);
 		this.tpTarget = tpPos;
 	}

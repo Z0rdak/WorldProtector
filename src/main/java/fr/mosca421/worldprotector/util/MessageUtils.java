@@ -36,7 +36,7 @@ public final class MessageUtils {
     public static void sendRegionInfoCommand(String regionName, PlayerEntity player) {
         RegionManager.get().getRegion(regionName).ifPresent(region -> {
             BlockPos target = region.getTpTarget();
-            IFormattableTextComponent regionMsg = new StringTextComponent("Region '")
+            IFormattableTextComponent regionMsg = new StringTextComponent("CuboidRegion '")
                     .appendSibling(TextComponentUtils.wrapWithSquareBrackets(new StringTextComponent(regionName))
                             .setStyle(Style.EMPTY.setColor(Color.fromTextFormatting(TextFormatting.GREEN))
                                     .setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/wp region info " + regionName))

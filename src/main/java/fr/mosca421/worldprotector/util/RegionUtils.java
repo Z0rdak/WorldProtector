@@ -1,8 +1,8 @@
 package fr.mosca421.worldprotector.util;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import fr.mosca421.worldprotector.core.CuboidRegion;
 import fr.mosca421.worldprotector.core.IMarkableRegion;
-import fr.mosca421.worldprotector.core.Region;
 import fr.mosca421.worldprotector.data.RegionManager;
 import fr.mosca421.worldprotector.item.ItemRegionMarker;
 import net.minecraft.command.CommandSource;
@@ -55,7 +55,7 @@ public final class RegionUtils {
 				if (item.getTag().getBoolean(ItemRegionMarker.VALID)) {
 					AxisAlignedBB regionArea = getAreaFromNBT(item.getTag());
 					BlockPos tpPos = getTpTargetFromNBT(item.getTag());
-					Region region = new Region(regionName, regionArea, tpPos, player.world.getDimensionKey());
+					CuboidRegion region = new CuboidRegion(regionName, regionArea, tpPos, player.world.getDimensionKey());
 					RegionManager.get().addRegion(region, player);
 					item.getTag().putBoolean(ItemRegionMarker.VALID, false); // reset flag for consistent command behaviour
 					sendMessage(player, new TranslationTextComponent("message.region.define", regionName));
@@ -76,7 +76,7 @@ public final class RegionUtils {
 						RegionManager.get().getRegion(regionName).ifPresent(region -> {
 							region.setArea(getAreaFromNBT(item.getTag()));
 							region.setTpTarget(getTpTargetFromNBT(item.getTag()));
-							RegionManager.get().updateRegion(new Region(region.serializeNBT()), player);
+							RegionManager.get().updateRegion(new CuboidRegion(region.serializeNBT()), player);
 							item.getTag().putBoolean(ItemRegionMarker.VALID, false); // reset flag for consistent command behaviour
 							sendMessage(player, new TranslationTextComponent("message.region.redefine", regionName));
 						});
@@ -231,7 +231,7 @@ public final class RegionUtils {
 			RegionManager.get().getRegion(regionName).ifPresent(region -> {
 				String noFlagsText = new TranslationTextComponent("message.region.info.noflags").getString();
 				String noPlayersText = new TranslationTextComponent("message.region.info.noplayers").getString();
-				sendMessage(player, new StringTextComponent(TextFormatting.AQUA + "== Region '" + regionName + "' information =="));
+				sendMessage(player, new StringTextComponent(TextFormatting.AQUA + "== CuboidRegion '" + regionName + "' information =="));
 				sendDimensionTeleportLink(player, region, new TranslationTextComponent("message.region.list.entry", region.getName()));
 				sendMessage(player, new TranslationTextComponent("message.region.info.area", region.getArea().toString().substring(4)));
 				sendMessage(player, new TranslationTextComponent("message.region.info.priority", region.getPriority()));

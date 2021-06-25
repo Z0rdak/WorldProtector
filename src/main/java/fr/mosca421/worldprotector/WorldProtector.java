@@ -57,8 +57,8 @@ public class WorldProtector {
 		/*
 		if (event.player instanceof ServerPlayerEntity) {
 			ServerPlayerEntity player = (ServerPlayerEntity) event.player;
-			List<Region> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), RegionUtils.getDimension(player.world));
-			for (Region region : regions) {
+			List<CuboidRegion> regions = RegionUtils.getHandlingRegionsFor(player.getPosition(), RegionUtils.getDimension(player.world));
+			for (CuboidRegion region : regions) {
 				if (region.getFlags().contains("enter-message")) {
 					try {
 						if (!enter) {

@@ -178,8 +178,8 @@ public class ItemRegionStick extends Item {
 	}
 
 	private void setDisplayName(ItemStack regionStick, String region, String mode){
-		regionStick.setDisplayName(new StringTextComponent(TextFormatting.AQUA + "Region Stick [" + region + ", " + mode + "]"));
-	}
+        regionStick.setDisplayName(new StringTextComponent(TextFormatting.AQUA + "CuboidRegion Stick [" + region + ", " + mode + "]"));
+    }
 
 	public String getMode(ItemStack regionStick){
 		return regionStick.getTag().getString(MODE);
