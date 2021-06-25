@@ -57,6 +57,7 @@ public class EventPlayers {
         }
     }
 
+    // unrelated: mobs pickup logic => MobEntity#livingTick
     @SubscribeEvent
     public static void onPickupItem(EntityItemPickupEvent event) {
         if (!event.getPlayer().world.isRemote) {

@@ -6,16 +6,20 @@ import fr.mosca421.worldprotector.core.RegionFlag;
 import fr.mosca421.worldprotector.util.MessageUtils;
 import fr.mosca421.worldprotector.util.RegionUtils;
 import net.minecraft.block.*;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.tileentity.EnderChestTileEntity;
 import net.minecraft.tileentity.LecternTileEntity;
 import net.minecraft.tileentity.LockableTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -106,6 +110,33 @@ public class EventInteract {
 						MessageUtils.sendStatusMessage(player, "message.event.interact.access_container");
 					}
 					return;
+				}
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void onSteppedOnActivator(BlockEvent.NeighborNotifyEvent event) {
+		Block block = event.getWorld().getBlockState(event.getPos()).getBlock();
+		BlockPos pos = event.getPos();
+		boolean cancelEvent = false;
+		// tripwire does not work yet
+		if (block instanceof AbstractPressurePlateBlock
+			/*	|| block instanceof TripWireHookBlock
+				|| block instanceof TripWireBlock*/) {
+			// TODO: check for tripwire blocks in a row and surpress updates
+			List<IRegion> regions = RegionUtils.getHandlingRegionsFor(pos, (World) event.getWorld());
+			for (IRegion region : regions) {
+				if (region.containsFlag(RegionFlag.USE)) {
+					AxisAlignedBB areaAbovePressurePlate = new AxisAlignedBB(pos.getX() - 1, pos.getY(), pos.getZ() - 1, pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1);
+					List<PlayerEntity> players = ((World) event.getWorld()).getEntitiesWithinAABB(EntityType.PLAYER, areaAbovePressurePlate, (player) -> true);
+					for (PlayerEntity player : players) {
+						cancelEvent = cancelEvent || region.forbids(player);
+						if (cancelEvent && !region.isMuted()) {
+							MessageUtils.sendStatusMessage(player, "message.event.interact.use");
+						}
+						event.setCanceled(cancelEvent);
+					}
 				}
 			}
 		}

@@ -1,5 +1,10 @@
+1.16.5-2.1.6.0
+* Added mixin support. Implemented mixins for various Entities to fire EntityTravelToDimensionEvent.
+* Added flags: use-portal-items, use-portal-villagers, use-portal-players, use-portal-monsters, use-portal-animals, use-portal-minecarts.
+* Added NeighborNotifyEvent for pressure plate and the use flag.
 1.16.5-2.1.5.2
 * Fix sending message to player if player was not causing explosion (flag: ignite-explosions).
+* Fix changeDimension not considering permitted players.
 1.16.5-2.1.5.1
 * Fix actual region dimension being 1 block wider in each direction (Thanks Silently!).
 * Fix area check not being correct for positive axis directions.

@@ -9,6 +9,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
+import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
 import net.minecraft.entity.monster.ZombieEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
@@ -24,6 +27,7 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.List;
 
+import static fr.mosca421.worldprotector.event.EventMobs.isAnimal;
 import static fr.mosca421.worldprotector.event.EventMobs.isMonster;
 import static fr.mosca421.worldprotector.util.RegionUtils.getHandlingRegionsFor;
 
@@ -181,21 +185,31 @@ public class EventWorld {
         }
     }
 
-    // This event is only fired for PlayerEntities
+    // This event is only fired for PlayerEntities, See mixins for other entities
     @SubscribeEvent
     public static void onChangeDimension(EntityTravelToDimensionEvent event) {
         Entity entity = event.getEntity();
         List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(entity.getPosition(), entity.world);
         for (IMarkableRegion region : regions) {
             if (region.containsFlag(RegionFlag.USE_PORTAL.toString())) {
+                event.setCanceled(true);
+                return;
+            }
 
-                if (entity instanceof PlayerEntity) {
-                    event.setCanceled(true);
-                    if (!region.isMuted()) {
-                        MessageUtils.sendStatusMessage((PlayerEntity) entity, "message.event.player.change_dim");
-                    }
-                    return;
+            if (region.containsFlag(RegionFlag.USE_PORTAL_PLAYERS) && entity instanceof PlayerEntity && !region.permits((PlayerEntity) entity)) {
+                event.setCanceled(true);
+                if (!region.isMuted()) {
+                    MessageUtils.sendStatusMessage((PlayerEntity) entity, "message.event.player.change_dim");
                 }
+                return;
+            }
+            if (region.containsFlag(RegionFlag.USE_PORTAL_ITEMS) && entity instanceof ItemEntity
+                    || region.containsFlag(RegionFlag.USE_PORTAL_ANIMALS) && isAnimal(entity)
+                    || region.containsFlag(RegionFlag.USE_PORTAL_MONSTERS) && isMonster(entity)
+                    || region.containsFlag(RegionFlag.USE_PORTAL_VILLAGERS) && entity instanceof AbstractVillagerEntity
+                    || region.containsFlag(RegionFlag.USE_PORTAL_MINECARTS) && entity instanceof AbstractMinecartEntity) {
+                event.setCanceled(true);
+                return;
             }
         }
     }

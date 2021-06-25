@@ -3,8 +3,8 @@
 WorldProtector is a mod allows you to protect your constructions on your servers. It's based on the same principle as
 the plugin WorldGuard but with several differences at command level.
 
-**The port of the 1.16.5 version introduces a lot of new flags, new protection features, as well as some QoL improvements.
-This mentioned be aware that some described features below are not present in every version.**
+**The port of the 1.16.5 version introduces a lot of new flags, new protection features, as well as some QoL
+improvements. This mentioned be aware that some described features below are not present in every version.**
 
 To protect your world you can define regions which can be protected against various actions by adding flags to the
 regions. These flags prevent certain actions/events from happening to protect the region: e.g. placing blocks, using
@@ -106,8 +106,8 @@ You are also able to add or remove all flags by using the special flag 'all': ``
 <details>
   <summary> Flag list (click me):</summary>
 
-- **break**: prevents players from breaking blocks
-- **place**: prevents players from placing blocks
+- **break**: prevents players from breaking blocks and picking up fluids
+- **place**: prevents players from placing blocks and fluids
 - **ignite-explosives**: prevents explosives from blowing up
 - **explosions-blocks**: prevents all explosions from destroying blocks
 - **explosions-entities**: prevents all explosions from damaging entities
@@ -131,7 +131,7 @@ You are also able to add or remove all flags by using the special flag 'all': ``
 - **spawning-animal**: prevents spawning of animals
 - **spawning-irongolem**: prevents spawning of iron golems
 - **spawning-xp**: prevents spawning of xp orbs completely
-- **use**: prevents players to interact with most blocks like buttons, fences, doors, etc.
+- **use**: prevents players to interact with most blocks like buttons, doors, pressure plates, etc.
 - **use-bonemeal**: prevents players from using bone meal
 - **access-container**: prevents players from accessing most containers
 - **access-enderchest**: prevents players from accessing their ender chest
@@ -163,7 +163,13 @@ You are also able to add or remove all flags by using the special flag 'all': ``
 - **set-spawn**: prevents players from setting their spawn point
 - **sleep**: prevents players from sleeping
 - **spawn-portal**: prevents creating of portal blocks by lighting obsidian
-- **use-portal**: prevents all entities from using portals (changing dimensions)
+- **use-portal**: prevents all entities from using portals
+- **use-portal-players**: prevents players from using portals
+- **use-portal-villagers**: prevents villager entities from using portals
+- **use-portal-animals**: prevents animal entities from using portals
+- **use-portal-monsters**: prevents monster entities from using portals
+- **use-portal-minecarts**: prevents minecart entities from using portals
+- **use-portal-items**: prevents item entities from using portals
 
 </details>
 
@@ -234,20 +240,20 @@ The following features will be implemented first in the 1.16.5 version, but will
 1. Flags per dimension
 2. Black- and Whitelist options for regions and dimensions
 3. Configuration support
-    * Option to disable specific event checks completely for optimization
-    * Default blacklist/whitelist setting for regions
-    * Command permission
+   * Option to disable specific event checks completely for optimization
+   * Default blacklist/whitelist setting for regions
+   * Command permission
 
 4. Permission system
-    * Owner for regions
-    * Permission groups
-    * Permission levels for region manipulation (creating, deleting, activating, deactivating)
-    * Configuration support
+   * Owner for regions
+   * Permission groups
+   * Permission levels for region manipulation (creating, deleting, activating, deactivating)
+   * Configuration support
 5. [Patchouli](https://github.com/Vazkii/Patchouli/wiki) documentation
 6. Modularisation
-    * Configuration for server-side only usage
-    * Item-less alternative for the Region Marker
-    * CLI offers all functionality without using Items
+   * Configuration for server-side only usage
+   * Item-less alternative for the Region Marker
+   * CLI offers all functionality without using Items
 7. Region highlighting
 8. Define regions as [prism](https://en.wikipedia.org/wiki/Prism_(geometry)) shapes.
 

@@ -1,0 +1,18 @@
+{
+  "required" : true,
+  "compatibilityLevel": "JAVA_8",
+  "package": "fr.mosca421.worldprotector.mixin",
+  "refmap": "${mod_id}.refmap.json",
+  "mixins": [
+    "MixinAbstractMinecartEntity",
+    "MixinAgeableEntity",
+    "MixinFlyingEntity",
+    "MixinItemEntity",
+    "MixinMonsterEntity",
+    "MixinShulkerEntity",
+    "MixinSlimeEntity",
+    "MixinWaterMobEntity"
+  ],
+  "client": [],
+  "server": []
+}

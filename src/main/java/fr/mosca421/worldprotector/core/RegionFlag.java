@@ -68,6 +68,7 @@ public enum RegionFlag {
     //
     ITEM_DROP("item-drop"),
     ITEM_PICKUP("item-pickup"),
+    // unrelated: mobs pickup logic => MobEntity#livingTick
     LOOT_DROP("loot-drop"),
     XP_DROP_ALL("xp-drop-all"), // also includes blocks (furnace for example)
     XP_DROP_MONSTER("xp-drop-monsters"), // only hostile mobs
@@ -99,7 +100,14 @@ public enum RegionFlag {
     // USE_FIREWORK("use-firework"),
     //
     USE_PORTAL("use-portal"),
-    SPAWN_PORTAL("spawn-portal");
+    USE_PORTAL_PLAYERS("use-portal-players"),
+    USE_PORTAL_ITEMS("use-portal-items"),
+    USE_PORTAL_ANIMALS("use-portal-animals"),
+    USE_PORTAL_MONSTERS("use-portal-monsters"),
+    USE_PORTAL_VILLAGERS("use-portal-villagers"),
+    USE_PORTAL_MINECARTS("use-portal-minecarts"),
+    SPAWN_PORTAL("spawn-portal"),
+    STOP_LEAF_DECAY("stop-leaf-decay");
     //
     // EXIT_MESSAGE_TITLE("exit-message"), // TODO: Currently not working correctly
     // ENTER_MESSAGE_TITLE("enter-message"), // TODO: Currently not working correctly
