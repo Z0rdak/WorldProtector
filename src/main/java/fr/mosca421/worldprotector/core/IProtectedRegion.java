@@ -8,6 +8,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * This interface represents a general protected region.
+ * This region has most likely a set of flags to prevent certain action in
+ * this region and a set of player, which are allowed to bypass these
+ * restrictions.
+ * Additionally a flag can determine whether actions are whitelisted
+ * or blacklisted and a flag which determines whether the regions is
+ * active or not.
+ * <p>
+ * Classes which implement this interface must also provide a way
+ * to serialize the region data into a CompoundNBT.
+ */
 public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
 
     boolean addFlag(String flag);
@@ -27,8 +39,6 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
     boolean hasWhitelist();
 
     void setHasWhitelist(boolean hasWhitelist);
-
-    boolean permitsPlayer(PlayerEntity player);
 
     boolean isActive();
 

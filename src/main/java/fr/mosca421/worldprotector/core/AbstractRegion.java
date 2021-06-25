@@ -71,11 +71,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
-    public boolean permitsPlayer(PlayerEntity player) {
-        return this.players.containsKey(player.getUniqueID());
-    }
-
-    @Override
     public boolean isActive() {
         return this.isActive;
     }
