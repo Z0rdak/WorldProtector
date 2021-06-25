@@ -1,9 +1,12 @@
 package fr.mosca421.worldprotector.core;
 
+import fr.mosca421.worldprotector.util.RegionNBTConstants;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.RegistryKey;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
 /**
@@ -83,13 +86,31 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         this.tpTarget = tpPos;
     }
 
-    // TODO:
     @Override
-    public CompoundNBT serializeNBT(){
-        return null;
+    public CompoundNBT serializeNBT() {
+        CompoundNBT nbt = super.serializeNBT();
+        nbt.putString(RegionNBTConstants.NAME, name);
+        nbt.putInt(RegionNBTConstants.TP_X, this.tpTarget.getX());
+        nbt.putInt(RegionNBTConstants.TP_Y, this.tpTarget.getY());
+        nbt.putInt(RegionNBTConstants.TP_Z, this.tpTarget.getZ());
+        nbt.putInt(RegionNBTConstants.PRIORITY, priority);
+        nbt.putString(RegionNBTConstants.DIM, dimension.getLocation().toString());
+        nbt.putBoolean(RegionNBTConstants.MUTED, isMuted);
+        nbt.putString(RegionNBTConstants.AREA_TYPE, this.areaType);
+        return nbt;
     }
 
-    // TODO:
     @Override
-    public abstract void deserializeNBT(CompoundNBT nbt);
+    public void deserializeNBT(CompoundNBT nbt) {
+        super.deserializeNBT(nbt);
+        this.name = nbt.getString(RegionNBTConstants.NAME);
+        this.tpTarget = new BlockPos(nbt.getInt(RegionNBTConstants.TP_X),
+                nbt.getInt(RegionNBTConstants.TP_Y),
+                nbt.getInt(RegionNBTConstants.TP_Z));
+        this.priority = nbt.getInt(RegionNBTConstants.PRIORITY);
+        this.dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY,
+                new ResourceLocation(nbt.getString(RegionNBTConstants.DIM)));
+        this.isMuted = nbt.getBoolean(RegionNBTConstants.MUTED);
+        this.areaType = nbt.getString(RegionNBTConstants.AREA_TYPE);
+    }
 }

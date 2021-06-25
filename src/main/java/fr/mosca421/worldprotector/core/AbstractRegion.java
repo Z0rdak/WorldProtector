@@ -1,10 +1,15 @@
 package fr.mosca421.worldprotector.core;
 
+import fr.mosca421.worldprotector.util.RegionNBTConstants;
 import fr.mosca421.worldprotector.util.RegionPlayerUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
+import net.minecraftforge.common.util.Constants;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A abstract region represents the basic implementation of a IProtectedRegion.
@@ -112,8 +117,45 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
-    public abstract CompoundNBT serializeNBT();
+    public CompoundNBT serializeNBT() {
+        CompoundNBT nbt = new CompoundNBT();
+        nbt.putBoolean(RegionNBTConstants.WHITELIST, this.hasWhitelist);
+        nbt.putBoolean(RegionNBTConstants.ACTIVE, isActive);
+        // serialize flag data
+        ListNBT flagsNBT = new ListNBT();
+        flagsNBT.addAll(flags.stream()
+                .map(StringNBT::valueOf)
+                .collect(Collectors.toSet()));
+        nbt.put(RegionNBTConstants.FLAGS, flagsNBT);
+        // serialize player data
+        ListNBT playerList = nbt.getList(RegionNBTConstants.PLAYERS, Constants.NBT.TAG_COMPOUND);
+        players.forEach((uuid, name) -> {
+            CompoundNBT playerNBT = new CompoundNBT();
+            playerNBT.putUniqueId(RegionNBTConstants.UUID, uuid);
+            playerNBT.putString(RegionNBTConstants.NAME, name);
+            playerList.add(playerNBT);
+        });
+        nbt.put(RegionNBTConstants.PLAYERS, playerList);
+        return nbt;
+    }
 
     @Override
-    public abstract void deserializeNBT(CompoundNBT nbt);
+    public void deserializeNBT(CompoundNBT nbt) {
+        this.isActive = nbt.getBoolean(RegionNBTConstants.ACTIVE);
+        this.hasWhitelist = nbt.getBoolean(RegionNBTConstants.WHITELIST);
+        // deserialize flag data
+        this.flags.clear();
+        ListNBT flagsList = nbt.getList(RegionNBTConstants.FLAGS, Constants.NBT.TAG_STRING);
+        for (int i = 0; i < flagsList.size(); i++) {
+            flags.add(flagsList.getString(i));
+        }
+        // deserialize player data
+        this.players.clear();
+        ListNBT playerLists = nbt.getList(RegionNBTConstants.PLAYERS, Constants.NBT.TAG_COMPOUND);
+        for (int i = 0; i < playerLists.size(); i++) {
+            CompoundNBT playerMapping = playerLists.getCompound(i);
+            players.put(playerMapping.getUniqueId(RegionNBTConstants.UUID),
+                    playerMapping.getString(RegionNBTConstants.NAME));
+        }
+    }
 }
