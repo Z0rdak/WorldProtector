@@ -87,7 +87,7 @@ public class EventMobs {
 			if (!player.world.isRemote) {
 				List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(event.getParentB().getPosition(), event.getParentB().world);
 				for (IMarkableRegion region : regions) {
-					boolean isCanceled = isActionAndPlayerPermittedInRegion(region, player, (r, playerEntity) -> r.containsFlag(RegionFlag.ANIMAL_BREEDING.toString()) && r.permitsPlayer(playerEntity));
+					boolean isCanceled = isActionAndPlayerPermittedInRegion(region, player, (r, playerEntity) -> r.containsFlag(RegionFlag.ANIMAL_BREEDING.toString()) && r.permits(playerEntity));
 					setCanceled = setCanceled && isCanceled;
 					if (!region.isMuted() && isCanceled) {
 						MessageUtils.sendStatusMessage(player, "message.event.mobs.breed_animals");
