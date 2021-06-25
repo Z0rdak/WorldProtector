@@ -49,7 +49,7 @@ public class EventMobs {
 	@SubscribeEvent
 	public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
 		DimensionRegionCache cache = RegionManager.get().getRegionDimCache(event.getWorld().getDimensionKey());
-		boolean setCanceled = true;
+		boolean setCanceled = false;
 		/*
 		if (cache != null) {
 			setCanceled = isActionPermittedInRegion(cache, event.getEntity(), EventMobs::checkMobSpawning);
