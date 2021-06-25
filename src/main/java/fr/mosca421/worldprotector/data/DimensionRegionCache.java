@@ -4,6 +4,7 @@ import fr.mosca421.worldprotector.core.CuboidRegion;
 import fr.mosca421.worldprotector.core.DimensionalRegion;
 import fr.mosca421.worldprotector.core.IMarkableRegion;
 import fr.mosca421.worldprotector.core.RegionFlag;
+import fr.mosca421.worldprotector.util.RegionNBTConstants;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -251,7 +252,7 @@ public class DimensionRegionCache extends HashMap<String, IMarkableRegion> imple
             regions.put(regionEntry.getKey(), regionEntry.getValue().serializeNBT());
         }
         nbt.put(REGIONS, regions);
-        // TODO: dimensional flags
+        nbt.put(RegionNBTConstants.DIM_REGION, this.dimensionalRegion.serializeNBT());
         return nbt;
     }
 
@@ -265,7 +266,8 @@ public class DimensionRegionCache extends HashMap<String, IMarkableRegion> imple
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-        // TODO: dimensional region
+        CompoundNBT dimensionalRegion = nbt.getCompound(RegionNBTConstants.DIM_REGION);
+        this.dimensionalRegion = new DimensionalRegion(dimensionalRegion);
         CompoundNBT regions = nbt.getCompound(REGIONS);
         for (String regionKey : regions.keySet()) {
             CompoundNBT regionNbt = regions.getCompound(regionKey);

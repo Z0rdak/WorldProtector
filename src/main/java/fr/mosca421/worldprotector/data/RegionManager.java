@@ -2,6 +2,7 @@ package fr.mosca421.worldprotector.data;
 
 import fr.mosca421.worldprotector.WorldProtector;
 import fr.mosca421.worldprotector.api.event.RegionEvent;
+import fr.mosca421.worldprotector.core.DimensionalRegion;
 import fr.mosca421.worldprotector.core.IMarkableRegion;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -32,9 +33,9 @@ public class RegionManager extends WorldSavedData {
     private static RegionManager clientRegionCopy = new RegionManager();
 
     static {
-        regionMap.put(World.OVERWORLD, new DimensionRegionCache());
-        regionMap.put(World.THE_NETHER, new DimensionRegionCache());
-        regionMap.put(World.THE_END, new DimensionRegionCache());
+        regionMap.put(World.OVERWORLD, new DimensionRegionCache(DimensionalRegion.OVERWORLD));
+        regionMap.put(World.THE_NETHER, new DimensionRegionCache(DimensionalRegion.THE_NETHER));
+        regionMap.put(World.THE_END, new DimensionRegionCache(DimensionalRegion.THE_END));
     }
 
     private RegionManager() {

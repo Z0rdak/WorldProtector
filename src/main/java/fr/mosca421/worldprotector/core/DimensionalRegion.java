@@ -20,7 +20,12 @@ public final class DimensionalRegion extends AbstractRegion {
         this.dimensionKey = dimensionKey;
     }
 
-    public DimensionalRegion(String dimensionKey){
+    public DimensionalRegion(CompoundNBT nbt) {
+        super();
+        this.deserializeNBT(nbt);
+    }
+
+    public DimensionalRegion(String dimensionKey) {
         this(RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(dimensionKey)));
     }
 
