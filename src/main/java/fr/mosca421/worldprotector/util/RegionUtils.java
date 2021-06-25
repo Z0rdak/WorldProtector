@@ -231,7 +231,7 @@ public final class RegionUtils {
 			RegionManager.get().getRegion(regionName).ifPresent(region -> {
 				String noFlagsText = new TranslationTextComponent("message.region.info.noflags").getString();
 				String noPlayersText = new TranslationTextComponent("message.region.info.noplayers").getString();
-				sendMessage(player, new StringTextComponent(TextFormatting.AQUA + "== CuboidRegion '" + regionName + "' information =="));
+				sendMessage(player, new StringTextComponent(TextFormatting.AQUA + "== Region '" + regionName + "' information =="));
 				sendDimensionTeleportLink(player, region, new TranslationTextComponent("message.region.list.entry", region.getName()));
 				sendMessage(player, new TranslationTextComponent("message.region.info.area", region.getArea().toString().substring(4)));
 				sendMessage(player, new TranslationTextComponent("message.region.info.priority", region.getPriority()));

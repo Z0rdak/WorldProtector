@@ -188,7 +188,6 @@ public class ItemRegionMarker extends Item {
 	public void inventoryTick(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
 		super.inventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
 		if (!worldIn.isRemote && !stack.hasTag()) {
-            WorldProtector.LOGGER.info("CuboidRegion Marker nbt initialized");
             CompoundNBT nbt = new CompoundNBT();
             nbt.putInt(CYCLE_POINT_ID, 0);
             nbt.putBoolean(VALID, false);

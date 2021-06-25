@@ -103,7 +103,7 @@ public final class RegionFlagUtils {
 
 	public static void listRegionFlags(PlayerEntity player, String regionName) {
 		RegionManager.get().getRegion(regionName).ifPresent(region -> {
-            sendMessage(player, new TranslationTextComponent(TextFormatting.AQUA + "== Flags in CuboidRegion '" + regionName + " ' =="));
+            sendMessage(player, new TranslationTextComponent(TextFormatting.AQUA + "== Flags in Region '" + regionName + " ' =="));
             if (region.getFlags().isEmpty()) {
                 sendMessage(player, new TranslationTextComponent("message.region.info.noflags"));
                 return;

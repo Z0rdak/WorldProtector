@@ -97,7 +97,7 @@ public final class RegionPlayerUtils {
 
     public static void listPlayersInRegion(String regionName, PlayerEntity player) {
         RegionManager.get().getRegion(regionName).ifPresent(region -> {
-            sendMessage(player, new TranslationTextComponent(TextFormatting.AQUA + "== Players in CuboidRegion '" + regionName + " ' =="));
+            sendMessage(player, new TranslationTextComponent(TextFormatting.AQUA + "== Players in Region '" + regionName + " ' =="));
             if (region.getPlayers().isEmpty()) {
                 sendMessage(player, new TranslationTextComponent("message.region.info.noplayers"));
                 return;
