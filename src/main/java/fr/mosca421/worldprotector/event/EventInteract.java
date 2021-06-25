@@ -125,8 +125,8 @@ public class EventInteract {
 			/*	|| block instanceof TripWireHookBlock
 				|| block instanceof TripWireBlock*/) {
 			// TODO: check for tripwire blocks in a row and surpress updates
-			List<IRegion> regions = RegionUtils.getHandlingRegionsFor(pos, (World) event.getWorld());
-			for (IRegion region : regions) {
+			List<IMarkableRegion> regions = RegionUtils.getHandlingRegionsFor(pos, (World) event.getWorld());
+			for (IMarkableRegion region : regions) {
 				if (region.containsFlag(RegionFlag.USE)) {
 					AxisAlignedBB areaAbovePressurePlate = new AxisAlignedBB(pos.getX() - 1, pos.getY(), pos.getZ() - 1, pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1);
 					List<PlayerEntity> players = ((World) event.getWorld()).getEntitiesWithinAABB(EntityType.PLAYER, areaAbovePressurePlate, (player) -> true);
