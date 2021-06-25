@@ -1,5 +1,6 @@
 package fr.mosca421.worldprotector.core;
 
+import fr.mosca421.worldprotector.util.RegionNBTConstants;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
@@ -12,7 +13,7 @@ import net.minecraft.world.World;
  */
 public final class DimensionalRegion extends AbstractRegion {
 
-    private final RegistryKey<World> dimensionKey;
+    private RegistryKey<World> dimensionKey;
 
     public DimensionalRegion(RegistryKey<World> dimensionKey) {
         super();
@@ -33,12 +34,15 @@ public final class DimensionalRegion extends AbstractRegion {
 
     @Override
     public CompoundNBT serializeNBT() {
-        // TODO
-        return null;
+        CompoundNBT nbt = super.serializeNBT();
+        nbt.putString(RegionNBTConstants.DIM, this.dimensionKey.getLocation().toString());
+        return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-        // TODO
+        super.deserializeNBT(nbt);
+        String dim = nbt.getString(RegionNBTConstants.DIM);
+        this.dimensionKey = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(dim));
     }
 }

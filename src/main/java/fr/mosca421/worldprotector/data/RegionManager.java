@@ -337,7 +337,7 @@ public class RegionManager extends WorldSavedData {
 
     public boolean removeFlag(IMarkableRegion region, String flag) {
         if (containsDimensionFor(region)) {
-            boolean wasRemoved = getCache(region).removeFlag(region, flag);
+            boolean wasRemoved = getCache(region).removeDimFlag(region, flag);
             if (wasRemoved) {
                 markDirty();
             }
@@ -372,7 +372,7 @@ public class RegionManager extends WorldSavedData {
 
     public boolean addFlag(IMarkableRegion region, String flag) {
         if (containsDimensionFor(region)) {
-            boolean wasAdded = getCache(region).addFlag(region, flag);
+            boolean wasAdded = getCache(region).addDimFlag(region, flag);
             if (wasAdded) {
                 markDirty();
             }
@@ -456,13 +456,13 @@ public class RegionManager extends WorldSavedData {
 
     public void addFlagToDim(RegistryKey<World> dimension, String flag) {
         if (regionMap.containsKey(dimension)) {
-            regionMap.get(dimension).addFlag(flag);
+            regionMap.get(dimension).addDimFlag(flag);
         }
     }
 
     public void removeFlagFromDim(RegistryKey<World> dimension, String flag) {
         if (regionMap.containsKey(dimension)) {
-            regionMap.get(dimension).removeFlag(flag);
+            regionMap.get(dimension).removeDimFlag(flag);
         }
     }
 
