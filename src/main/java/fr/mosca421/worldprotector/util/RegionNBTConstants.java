@@ -16,6 +16,7 @@ public final class RegionNBTConstants {
     public static final String EXIT_MSG_1 = "exit_msg";
     public static final String EXIT_MSG_2 = "exit_msg_small";
     public static final String MUTED = "muted";
+    public static final String AREA = "area";
     public static final String AREA_TYPE = "area_type";
     public static final String WHITELIST = "has_whitelist";
     public static final String DIM_REGION = "dim_region";

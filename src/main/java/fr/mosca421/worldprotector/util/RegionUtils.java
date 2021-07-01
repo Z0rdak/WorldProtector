@@ -1,6 +1,7 @@
 package fr.mosca421.worldprotector.util;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import fr.mosca421.worldprotector.core.CuboidArea;
 import fr.mosca421.worldprotector.core.CuboidRegion;
 import fr.mosca421.worldprotector.core.IMarkableRegion;
 import fr.mosca421.worldprotector.data.RegionManager;
@@ -46,13 +47,14 @@ public final class RegionUtils {
 	}
 
 	public static void createRegion(String regionName, PlayerEntity player, ItemStack item) {
-		if (regionName.contains(" ")) { // region contains whitespace
+		if (regionName.contains(" ")) {
 			sendStatusMessage(player, "message.region.define.error");
 			return;
 		}
 		if (item.getItem() instanceof ItemRegionMarker) {
 			if (item.getTag() != null) {
 				if (item.getTag().getBoolean(ItemRegionMarker.VALID)) {
+					// TODO: area type
 					AxisAlignedBB regionArea = getAreaFromNBT(item.getTag());
 					BlockPos tpPos = getTpTargetFromNBT(item.getTag());
 					CuboidRegion region = new CuboidRegion(regionName, regionArea, tpPos, player.world.getDimensionKey());
@@ -74,7 +76,14 @@ public final class RegionUtils {
 				if (item.getTag().getBoolean(ItemRegionMarker.VALID)) {
 					if (RegionManager.get().containsRegion(regionName)) {
 						RegionManager.get().getRegion(regionName).ifPresent(region -> {
-							region.setArea(getAreaFromNBT(item.getTag()));
+							switch (region.getArea().getAreaType()) {
+								case CUBOID:
+									region.setArea(new CuboidArea(getAreaFromNBT(item.getTag())));
+									break;
+								// TODO:
+								case POLYGON_2D:
+									break;
+							}
 							region.setTpTarget(getTpTargetFromNBT(item.getTag()));
 							RegionManager.get().updateRegion(new CuboidRegion(region.serializeNBT()), player);
 							item.getTag().putBoolean(ItemRegionMarker.VALID, false); // reset flag for consistent command behaviour
@@ -309,6 +318,10 @@ public final class RegionUtils {
 
 	public static Collection<String> getDimensionList() {
 		return RegionManager.get().getDimensionList();
+	}
+
+	public static Collection<RegistryKey<World>> getDimensions() {
+		return RegionManager.get().getDimensions();
 	}
 
 	/**

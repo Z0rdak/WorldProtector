@@ -234,6 +234,10 @@ public class RegionManager extends WorldSavedData {
                 .collect(Collectors.toList());
     }
 
+    public Collection<RegistryKey<World>> getDimensions() {
+        return regionMap.keySet();
+    }
+
     public void clearRegions() {
         regionMap.forEach((dim, cache) -> cache.clearRegions());
         markDirty();
