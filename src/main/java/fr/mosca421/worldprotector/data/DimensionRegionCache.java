@@ -41,6 +41,8 @@ public class DimensionRegionCache extends HashMap<String, IMarkableRegion> imple
         deserializeNBT(nbt);
     }
 
+    /* Dimensional Region methods - Start */
+
     public boolean addDimFlag(String flag) {
         return this.dimensionalRegion.addFlag(flag);
     }
@@ -57,6 +59,7 @@ public class DimensionRegionCache extends HashMap<String, IMarkableRegion> imple
         return this.dimensionalRegion.containsFlag(flag);
     }
 
+    // TODO: ?
     public boolean hasFlagActive(RegionFlag flag) {
         if (this.dimensionalRegion.containsFlag(flag.toString())) {
             return !this.dimensionalRegion.hasWhitelist();
@@ -72,6 +75,47 @@ public class DimensionRegionCache extends HashMap<String, IMarkableRegion> imple
     public void setHasWhitelist(boolean hasWhitelist) {
         this.dimensionalRegion.setHasWhitelist(hasWhitelist);
     }
+
+    public void setDimActiveState(boolean setActive) {
+        this.dimensionalRegion.setIsActive(setActive);
+    }
+
+    public boolean isDimActive() {
+        return this.dimensionalRegion.isActive();
+    }
+
+    public Collection<String> getDimPlayersNames() {
+        return this.dimensionalRegion.getPlayers().values();
+    }
+
+    public boolean addDimPlayer(PlayerEntity player) {
+        return this.dimensionalRegion.addPlayer(player);
+    }
+
+    public boolean removeDimPlayer(PlayerEntity player) {
+        return this.dimensionalRegion.removePlayer(player);
+    }
+
+    public boolean dimPermits(PlayerEntity player) {
+        return this.dimensionalRegion.permits(player);
+    }
+
+
+    public boolean removeDimFlag(IMarkableRegion region, String flag) {
+        if (this.containsKey(region.getName())) {
+            return this.get(region.getName()).removeFlag(flag);
+        }
+        return false;
+    }
+
+    public boolean addDimFlag(IMarkableRegion region, String flag) {
+        if (this.containsKey(region.getName())) {
+            return this.get(region.getName()).addFlag(flag);
+        }
+        return false;
+    }
+
+    /* Dimensional Region methods - End */
 
     public boolean isActive(String regionName) {
         if (this.containsKey(regionName)) {
@@ -143,20 +187,6 @@ public class DimensionRegionCache extends HashMap<String, IMarkableRegion> imple
             return this.get(regionName).getFlags();
         }
         return new HashSet<>();
-    }
-
-    public boolean removeDimFlag(IMarkableRegion region, String flag) {
-        if (this.containsKey(region.getName())) {
-            return this.get(region.getName()).removeFlag(flag);
-        }
-        return false;
-    }
-
-    public boolean addDimFlag(IMarkableRegion region, String flag) {
-        if (this.containsKey(region.getName())) {
-            return this.get(region.getName()).addFlag(flag);
-        }
-        return false;
     }
 
     public List<String> addFlags(String regionName, List<String> flags) {

@@ -459,24 +459,6 @@ public class RegionManager extends WorldSavedData {
         return new HashSet<>();
     }
 
-    public void addFlagToDim(RegistryKey<World> dimension, String flag) {
-        if (regionMap.containsKey(dimension)) {
-            regionMap.get(dimension).addDimFlag(flag);
-        }
-    }
-
-    public void removeFlagFromDim(RegistryKey<World> dimension, String flag) {
-        if (regionMap.containsKey(dimension)) {
-            regionMap.get(dimension).removeDimFlag(flag);
-        }
-    }
-
-    public void setDimHasWhitelist(RegistryKey<World> dimension, boolean setWhitelist) {
-        if (regionMap.containsKey(dimension)) {
-            regionMap.get(dimension).setHasWhitelist(setWhitelist);
-        }
-    }
-
     public void addRegion(IMarkableRegion region, PlayerEntity player) {
         if (regionMap.containsKey(region.getDimension())) {
             regionMap.get(region.getDimension()).addRegion(region);
@@ -486,5 +468,83 @@ public class RegionManager extends WorldSavedData {
         }
         MinecraftForge.EVENT_BUS.post(new RegionEvent.CreateRegionEvent(region, player));
         markDirty();
+    }
+
+    public boolean addDimFlag(RegistryKey<World> dimension, String flag) {
+        if (regionMap.containsKey(dimension)) {
+            boolean res = regionMap.get(dimension).addDimFlag(flag);
+            markDirty();
+            return res;
+        }
+        return false;
+    }
+
+    public boolean removeDimFlag(RegistryKey<World> dimension, String flag) {
+        if (regionMap.containsKey(dimension)) {
+            boolean res = regionMap.get(dimension).removeDimFlag(flag);
+            markDirty();
+            return res;
+        }
+        return false;
+    }
+
+    public void setDimHasWhitelist(RegistryKey<World> dimension, boolean setWhitelist) {
+        if (regionMap.containsKey(dimension)) {
+            regionMap.get(dimension).setHasWhitelist(setWhitelist);
+            markDirty();
+        }
+    }
+
+    public boolean isDimRegionActive(RegistryKey<World> dim) {
+        if (regionMap.containsKey(dim)) {
+            return regionMap.get(dim).isDimActive();
+        }
+        return false;
+    }
+
+    public boolean hasDimWhitelist(RegistryKey<World> dim) {
+        if (regionMap.containsKey(dim)) {
+            return regionMap.get(dim).hasWhitelist();
+        }
+        return false;
+    }
+
+    public boolean doesDimContain(RegistryKey<World> dim, String flag) {
+        if (regionMap.containsKey(dim)) {
+            return regionMap.get(dim).hasFlagActive(flag);
+        }
+        return false;
+    }
+
+    public void setDimActiveState(RegistryKey<World> dim, boolean setActive) {
+        if (regionMap.containsKey(dim)) {
+            regionMap.get(dim).setDimActiveState(setActive);
+            markDirty();
+        }
+    }
+
+    public boolean doesDimPermit(RegistryKey<World> dim, PlayerEntity player) {
+        if (regionMap.containsKey(dim)) {
+            return regionMap.get(dim).dimPermits(player);
+        }
+        return false;
+    }
+
+    public boolean addDimPlayer(RegistryKey<World> dim, PlayerEntity player) {
+        if (regionMap.containsKey(dim)) {
+            boolean res = regionMap.get(dim).addDimPlayer(player);
+            markDirty();
+            return res;
+        }
+        return false;
+    }
+
+    public boolean removeDimPlayer(RegistryKey<World> dim, PlayerEntity player) {
+        if (regionMap.containsKey(dim)) {
+            boolean res = regionMap.get(dim).removeDimPlayer(player);
+            markDirty();
+            return res;
+        }
+        return false;
     }
 }
