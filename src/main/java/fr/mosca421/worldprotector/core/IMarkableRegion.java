@@ -1,15 +1,13 @@
 package fr.mosca421.worldprotector.core;
 
 import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 /**
  * A markable region extends the general IProtectedRegion by allowing
- * to specify a certain area for the CuboidRegion. The region can be accessed by its name.
- * For now the area can only be marked by using a AxisAlignedBB. This will be
- * abstracted to provide a more general representation in the future.
+ * to specify a certain area for the Region. The region can be accessed by its name.
+ * The area of the region is defined by a IMarkableArea instance.
  * Additionally a markable region has a dimension it is located in.
  * <p>
  * A markable region also can be muted, has a priority to manage overlapping regions
@@ -21,9 +19,9 @@ public interface IMarkableRegion extends IProtectedRegion {
 
    RegistryKey<World> getDimension();
 
-   AxisAlignedBB getArea();
+   IMarkableArea getArea();
 
-   void setArea(AxisAlignedBB areaFromNBT);
+   void setArea(IMarkableArea area);
 
    boolean containsPosition(BlockPos position);
 

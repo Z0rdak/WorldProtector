@@ -4,7 +4,6 @@ import fr.mosca421.worldprotector.util.RegionNBTConstants;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
@@ -15,36 +14,32 @@ import net.minecraft.world.World;
  */
 public abstract class AbstractMarkableRegion extends AbstractRegion implements IMarkableRegion {
 
-    public final static String CUBOID = "cuboid";
+    public final static int DEFAULT_PRIORITY = 2;
 
     protected String name;
     protected int priority;
     protected RegistryKey<World> dimension;
-    protected AxisAlignedBB area;
+    protected IMarkableArea area;
     protected boolean isMuted;
-    /* NOTE: The area type is not yet used, since there is only one the of area,
-    the Cuboid (AxisAllingedBB). But even if the value is not used, it is still stored
-     */
-    protected String areaType;
+    protected AreaType areaType;
     protected BlockPos tpTarget;
 
-    public AbstractMarkableRegion(String name, AxisAlignedBB area, RegistryKey<World> dimension) {
+    public AbstractMarkableRegion(String name, IMarkableArea area, RegistryKey<World> dimension) {
         this();
         this.name = name;
         this.dimension = dimension;
         this.area = area;
-        this.areaType = CUBOID;
+        this.areaType = area.getAreaType();
     }
 
     protected AbstractMarkableRegion() {
-        this.priority = 2;
+        this.priority = DEFAULT_PRIORITY;
         this.isMuted = false;
     }
 
-    public abstract AxisAlignedBB getArea();
+    public abstract IMarkableArea getArea();
 
-    @Override
-    public abstract void setArea(AxisAlignedBB area);
+    public abstract void setArea(IMarkableArea area);
 
     @Override
     public String getName() {
@@ -96,7 +91,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         nbt.putInt(RegionNBTConstants.PRIORITY, priority);
         nbt.putString(RegionNBTConstants.DIM, dimension.getLocation().toString());
         nbt.putBoolean(RegionNBTConstants.MUTED, isMuted);
-        nbt.putString(RegionNBTConstants.AREA_TYPE, this.areaType);
+        nbt.putString(RegionNBTConstants.AREA_TYPE, this.areaType.toString());
         return nbt;
     }
 
@@ -111,6 +106,6 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         this.dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY,
                 new ResourceLocation(nbt.getString(RegionNBTConstants.DIM)));
         this.isMuted = nbt.getBoolean(RegionNBTConstants.MUTED);
-        this.areaType = nbt.getString(RegionNBTConstants.AREA_TYPE);
+        this.areaType = AreaType.valueOf(nbt.getString(RegionNBTConstants.AREA_TYPE));
     }
 }
