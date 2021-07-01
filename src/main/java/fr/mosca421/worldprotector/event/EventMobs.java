@@ -21,6 +21,7 @@ import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.AnimalTameEvent;
@@ -129,8 +130,8 @@ public class EventMobs {
 				|| entity instanceof ShulkerEntity;
 	}
 
-	private static boolean regionContainsEntity(IMarkableRegion region, Entity entity){
-		return region.getArea().contains(entity.getPositionVec());
+	private static boolean regionContainsEntity(IMarkableRegion region, Entity entity) {
+		return region.getArea().contains(new BlockPos(entity.getPositionVec()));
 	}
 
 	@SubscribeEvent
