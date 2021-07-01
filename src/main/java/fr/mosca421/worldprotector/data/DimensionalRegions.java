@@ -1,5 +1,6 @@
 package fr.mosca421.worldprotector.data;
 
+import fr.mosca421.worldprotector.core.DimensionalRegion;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
@@ -12,6 +13,14 @@ import java.util.Collection;
  * Utility class to manage dimensional regions of DimensionalRegionCaches accessed through the RegionManager.
  */
 public class DimensionalRegions {
+
+    public static DimensionalRegion getDimensionalRegion(String dimKey) {
+        return getDimensionalRegion(keyToDim(dimKey));
+    }
+
+    public static DimensionalRegion getDimensionalRegion(RegistryKey<World> dim) {
+        return RegionManager.get().getDimensionalRegion(dim);
+    }
 
     public static Collection<String> getDimFlags(String dimKey) {
         return getDimFlags(keyToDim(dimKey));

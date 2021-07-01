@@ -283,6 +283,13 @@ public class RegionManager extends WorldSavedData {
         return null;
     }
 
+    public DimensionalRegion getDimensionalRegion(RegistryKey<World> dim) {
+        if (regionMap.containsKey(dim)) {
+            return regionMap.get(dim).getDimensionalRegion();
+        }
+        return null;
+    }
+
     public boolean containsRegion(String regionName, RegistryKey<World> dim) {
         if (regionMap.containsKey(dim)) {
             return regionMap.get(dim).containsKey(regionName);

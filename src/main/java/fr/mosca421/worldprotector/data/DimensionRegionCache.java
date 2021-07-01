@@ -305,4 +305,8 @@ public class DimensionRegionCache extends HashMap<String, IMarkableRegion> imple
             this.addRegion(region);
         }
     }
+
+    public DimensionalRegion getDimensionalRegion() {
+        return this.dimensionalRegion;
+    }
 }
