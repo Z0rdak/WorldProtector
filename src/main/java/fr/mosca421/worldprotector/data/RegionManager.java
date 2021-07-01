@@ -547,4 +547,20 @@ public class RegionManager extends WorldSavedData {
         }
         return false;
     }
+
+    public Collection<String> getDimPlayers(RegistryKey<World> dim) {
+        if (regionMap.containsKey(dim)) {
+            return regionMap.get(dim).getDimPlayersNames();
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    public Collection<String> getDimFlags(RegistryKey<World> dim) {
+        if (regionMap.containsKey(dim)) {
+            return regionMap.get(dim).getDimensionFlags();
+        } else {
+            return Collections.emptyList();
+        }
+    }
 }

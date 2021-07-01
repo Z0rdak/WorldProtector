@@ -6,10 +6,28 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
+import java.util.Collection;
+
 /**
  * Utility class to manage dimensional regions of DimensionalRegionCaches accessed through the RegionManager.
  */
 public class DimensionalRegions {
+
+    public static Collection<String> getDimFlags(String dimKey) {
+        return getDimFlags(keyToDim(dimKey));
+    }
+
+    public static Collection<String> getDimFlags(RegistryKey<World> dim) {
+        return RegionManager.get().getDimFlags(dim);
+    }
+
+    public static Collection<String> getDimPlayers(String dimKey) {
+        return getDimPlayers(keyToDim(dimKey));
+    }
+
+    public static Collection<String> getDimPlayers(RegistryKey<World> dim) {
+        return RegionManager.get().getDimPlayers(dim);
+    }
 
     public static boolean doesDimPermit(String dimKey, PlayerEntity player) {
         return doesDimPermit(keyToDim(dimKey), player);
