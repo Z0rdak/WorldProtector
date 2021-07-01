@@ -34,6 +34,7 @@ public class CommandWorldProtector {
                 .then(Commands.literal(Command.HELP.toString())
                         .executes(ctx -> giveHelp(ctx.getSource())))
                 .then(CommandRegion.REGION_COMMAND)
+                .then(CommandDimension.DIMENSION_COMMAND)
                 .then(CommandExpand.EXPAND_COMMAND)
                 .then(CommandFlag.FLAG_COMMAND)
                 .then(CommandPlayer.PLAYER_COMMAND);
