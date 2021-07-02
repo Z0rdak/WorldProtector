@@ -207,7 +207,7 @@ public final class RegionUtils {
 			RegionManager.get().getRegion(regionName).ifPresent(region -> {
 				try {
 					BlockPos target = region.getTpTarget();
-					String command = "execute in " + region.getDimension().getLocation().toString() + " run tp " + player.getName().getString() + " " + target.getX() + " " + target.getY() + " " + target.getZ();
+					String command = "execute in " + region.getDimension().getLocation() + " run tp " + player.getName().getString() + " " + target.getX() + " " + target.getY() + " " + target.getZ();
 					sendStatusMessage(player, new TranslationTextComponent("message.region.teleport", region.getName()));
 					source.getServer().getCommandManager().getDispatcher().execute(command, source);
 				} catch (CommandSyntaxException e) {
@@ -296,9 +296,7 @@ public final class RegionUtils {
 			sendStatusMessage(player, "message.region.info.no_regions");
 			return;
 		}
-		regions.forEach(region -> {
-			sendDimensionTeleportLink(player, region, new TranslationTextComponent("message.region.list.entry", region.getName()));
-		});
+		regions.forEach(region -> sendDimensionTeleportLink(player, region, new TranslationTextComponent("message.region.list.entry", region.getName())));
 	}
 
 	public static void giveRegionListForDim(PlayerEntity player, String dim) {
@@ -311,24 +309,13 @@ public final class RegionUtils {
 			sendMessage(player, new TranslationTextComponent("message.region.info.regions_for_dim", dim));
 			return;
 		}
-		regionsForDim.forEach(region -> {
-			sendDimensionTeleportLink(player, region, new TranslationTextComponent("message.region.list.entry", region.getName()));
-		});
+		regionsForDim.forEach(region -> sendDimensionTeleportLink(player, region, new TranslationTextComponent("message.region.list.entry", region.getName())));
 	}
 
 	public static Collection<String> getDimensionList() {
 		return RegionManager.get().getDimensionList();
 	}
 
-	public static Collection<RegistryKey<World>> getDimensions() {
-		return RegionManager.get().getDimensions();
-	}
-
-	/**
-	 * Only for usage in commands
-	 *
-	 * @return
-	 */
 	public static Collection<String> getQuotedDimensionList() {
 		return getDimensionList().stream()
 				.map(dim -> "'" + dim + "'")
@@ -360,10 +347,6 @@ public final class RegionUtils {
 			}
 		}
 		return handlingRegions;
-	}
-
-	public static String getDimensionString(World world) {
-		return world.getDimensionKey().getLocation().toString();
 	}
 
 	private static AxisAlignedBB getAreaFromNBT(CompoundNBT nbtTag) {
